@@ -2,8 +2,44 @@ import React from 'react'
 import Particles from '../../components/Particles'
 import ScrollVelocity from '../../components/ScrollVelocity'
 import images from '../../assets'
+import Footer from '../../components/Footer'
+import Navbar from '../../components/Navbar'
+import TextType from '../../components/TextType'
 
 const Home: React.FC = () => {
+
+  // const cards = [
+  //   {
+  //     img: images.img1,
+  //     title: 'Connect Your Accounts',
+  //     desc: "Securely link apps and services to analyze shared data.",
+  //     gradient: 'from-green-500/20 to-green-400/20',
+  //     border: 'border-green-500/30',
+  //   },
+  //   {
+  //     img: images.img2,
+  //     title: 'Use Fake Info When You Need It',
+  //     desc: 'Generate fake names, emails, PAN etc. to protect your real identity where needed.',
+  //     gradient: 'from-red-500/20 to-orange-400/20',
+  //     border: 'border-red-500/30',
+  //   },
+  //   {
+  //     img: images.img3,
+  //     title: 'Detect Breaches Instantly',
+  //     desc: 'We scan your email against public leak databases and notify you if your data is compromised.',
+  //     gradient: 'from-blue-500/20 to-cyan-400/20',
+  //     border: 'border-blue-500/30',
+  //   },
+  //   {
+  //     img: images.img9,
+  //     title: 'Store Notes Safely',
+  //     desc: 'Store license keys, passwords or any sensitive data in a secure, encrypted vault with PIN protection.',
+  //     gradient: 'from-purple-500/20 to-pink-400/20',
+  //     border: 'border-purple-500/30',
+  //   },
+  // ];
+
+
   const scrollTexts = [
     "Protect . Fake . Track . Detect . Secure . Analyze . Encrypt . Monitor",
     "Sentriq is your personal data command center . Built with Privacy",
@@ -16,46 +52,19 @@ const Home: React.FC = () => {
 
 
       {/* Hero Section Container for Particles and Content */}
-      <div className="relative min-h-[70vh] pb-10">
+      <div className="relative mt-20 min-h-[70vh] pb-10">
 
-        {/* Navigation */}
-        <nav className="relative z-20 flex items-center justify-between px-8 py-6">
-          <div className="flex items-center space-x-2">
-            <img src={images.logo} alt="SenTriq" className="h-10 w-10" />
-            <span className="text-xl font-bold text-[#ffffff]">SenTriq</span>
-          </div>
-
-          <div className="flex items-center space-x-6">
-            <div className="flex items-center space-x-4 bg-slate-800/50 rounded-full px-6 py-2 backdrop-blur-sm">
-              <button className="text-white hover:text-[#a6cf63] transition-colors">Home</button>
-              <button className="text-white hover:text-[#a6cf63] transition-colors">Features</button>
-              <div className="flex items-center space-x-2">
-                <div className="w-2 h-2 bg-[#a2e535] rounded-full"></div>
-                <div className="w-2 h-2 bg-[#a2e535] rounded-full"></div>
-              </div>
-            </div>
-
-            <div className="flex items-center space-x-3">
-              <button className="bg-[#a2e535] text-black px-6 py-2 rounded-full font-semibold hover:bg-[#a6cf63] transition-colors">
-                Get Started
-              </button>
-              <button className="bg-slate-700 text-white px-6 py-2 rounded-full font-semibold hover:bg-slate-600 transition-colors">
-                Login
-              </button>
-            </div>
-          </div>
-        </nav>
+        <Navbar />
         {/* Particles Background - Now limited to the Hero section */}
         <div className="absolute inset-0 z-0">
           <Particles
-            particleColors={['#ffffff', '#ffffff']}
-            particleCount={200}
+            particleCount={250}
             particleSpread={10}
-            speed={0.1}
-            particleBaseSize={100}
+            speed={0.7}
+            particleSize={30}
+            particleColor="#00ffcc"
             moveParticlesOnHover={true}
-            alphaParticles={false}
-            disableRotation={false}
+            disableRotation={true}
           />
         </div>
 
@@ -67,9 +76,22 @@ const Home: React.FC = () => {
 
         {/* Hero Section Content */}
         <div className="relative z-20 flex flex-col items-center justify-center min-h-[70vh] px-8">
-          <div className="text-center max-w-4xl mx-auto">
+          <div className="text-center max-w-7xl mx-auto">
             <h1 className="w-full text-6xl md:text-7xl font-bold mb-6 leading-tight">
-              Your Data. Your Privacy. Your Rules.
+
+              <TextType
+                text={[
+                  "Your Data. Your Privacy. Your Rules.",
+                  "Built with Privacy at the Core.",
+                ]}
+                typingSpeed={80}
+                deletingSpeed={80}
+                pauseDuration={2500}
+                cursorCharacter="_"
+                cursorBlinkDuration={0.6}
+                hideCursorWhileTyping={false}
+                variableSpeed={{ min: 50, max: 100 }}
+              />
             </h1>
 
             <p className="text-xl text-slate-300 mb-8 max-w-2xl mx-auto">
@@ -93,16 +115,7 @@ const Home: React.FC = () => {
         <div className='absolute inset-0 bg-gradient-to-b from-[#146536] to-transparent'></div>
       </div>
 
-      {/* Scroll Velocity Animation Section */}
-      <div className="relative z-10 py-16">
-        <ScrollVelocity
-          texts={scrollTexts}
-          velocity={50}
-          className="text-white"
-          parallaxClassName="py-4"
-          scrollerClassName="text-2xl md:text-4xl font-bold"
-        />
-      </div>
+
 
       {/* What You Can Do Section */}
       <div className="relative z-10 py-20 px-8">
@@ -187,6 +200,17 @@ const Home: React.FC = () => {
         </div>
       </div>
 
+            {/* Scroll Velocity Animation Section */}
+      <div className="relative z-10 py-16">
+        <ScrollVelocity
+          texts={scrollTexts}
+          velocity={50}
+          className="text-white"
+          parallaxClassName="py-4"
+          scrollerClassName="text-2xl md:text-4xl font-bold"
+        />
+      </div>
+
       {/* Eye Cards Section */}
       <div className="relative z-10 py-20 px-8 bg-slate-900/50">
         <div className="max-w-7xl mx-auto">
@@ -262,85 +286,7 @@ const Home: React.FC = () => {
         </div>
       </div>
 
-      {/* Footer Section */}
-      <footer className="relative z-10 py-16 px-8 bg-slate-900/80">
-        <div className="max-w-7xl mx-auto">
-          {/* Footer Content Container with Green Border */}
-          <div className="border border-[#a2e535] rounded-3xl p-12 bg-slate-800/30 backdrop-blur-sm">
-            <div className="relative flex flex-col md:flex-row">
-
-              {/* Brand Section */}
-              <div className="flex-1 space-y-6 px-0 md:pr-12">
-                <div className="flex items-center space-x-3">
-                  <img src={images.logo} alt="SenTriq" className="h-12 w-12" />
-                  <span className="text-3xl font-bold text-white">SenTriq</span>
-                </div>
-                <div>
-                  <h3 className="text-2xl font-bold text-white mb-2">Where Privacy</h3>
-                  <h3 className="text-2xl font-bold text-white">Meets Control.</h3>
-                </div>
-              </div>
-
-              {/* Vertical Divider 1 - Hidden on mobile */}
-              <div className="hidden md:block absolute left-1/3 top-0 bottom-0 w-px bg-[#a2e535]"></div>
-
-              {/* Information Section */}
-              <div className="flex-1 space-y-6 px-0 md:px-12 mt-12 md:mt-0">
-                <h3 className="text-2xl font-bold text-white">Information</h3>
-                <div className="space-y-4">
-                  <a href="#" className="block text-slate-300 hover:text-[#a2e535] transition-colors text-lg">
-                    Privacy Policy
-                  </a>
-                  <a href="#" className="block text-slate-300 hover:text-[#a2e535] transition-colors text-lg">
-                    Terms of Service
-                  </a>
-                  <a href="#" className="block text-slate-300 hover:text-[#a2e535] transition-colors text-lg">
-                    About Us
-                  </a>
-                  <a href="#" className="block text-slate-300 hover:text-[#a2e535] transition-colors text-lg">
-                    Contact
-                  </a>
-                  <a href="#" className="block text-slate-300 hover:text-[#a2e535] transition-colors text-lg">
-                    FAQ
-                  </a>
-                </div>
-              </div>
-
-              {/* Vertical Divider 2 - Hidden on mobile */}
-              <div className="hidden md:block absolute left-2/3 top-0 bottom-0 w-px bg-[#a2e535]"></div>
-
-              {/* Connect With Us Section */}
-              <div className="flex-1 space-y-6 px-0 md:pl-12 mt-12 md:mt-0">
-                <h3 className="text-2xl font-bold text-white">Connect With Us</h3>
-                <div className="space-y-4">
-                  <a href="#" className="block text-slate-300 hover:text-[#a2e535] transition-colors text-lg">
-                    Twitter
-                  </a>
-                  <a href="#" className="block text-slate-300 hover:text-[#a2e535] transition-colors text-lg">
-                    LinkedIn
-                  </a>
-                  <a href="#" className="block text-slate-300 hover:text-[#a2e535] transition-colors text-lg">
-                    GitHub
-                  </a>
-                  <a href="#" className="block text-slate-300 hover:text-[#a2e535] transition-colors text-lg">
-                    Discord
-                  </a>
-                  <a href="#" className="block text-slate-300 hover:text-[#a2e535] transition-colors text-lg">
-                    Support
-                  </a>
-                </div>
-              </div>
-            </div>
-
-            {/* Copyright Section */}
-            <div className="border-t border-slate-700 mt-12 pt-8 text-center">
-              <p className="text-slate-400 text-lg">
-                © 2025 SenTriq. All rights reserved.
-              </p>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   )
 }
