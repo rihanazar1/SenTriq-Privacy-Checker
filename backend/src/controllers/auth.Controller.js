@@ -23,7 +23,7 @@ const register = asyncHandler(async (req, res) => {
     password
   });
 
-  const token = generateToken({ id: user._id });
+  const token = generateToken(user);
 
   res.status(201).json({
     success: true,
@@ -67,7 +67,7 @@ const login = asyncHandler(async (req, res) => {
     });
   }
 
-  const token = generateToken({ id: user._id });
+  const token = generateToken(user);
 
   res.status(200).json({
     success: true,
@@ -82,16 +82,34 @@ const login = asyncHandler(async (req, res) => {
 
 
 
-const getMe = asyncHandler(async (req, res) => {
-  res.status(200).json({
-    success: true,
-    data: {
-      id: req.user._id,
-      name: req.user.name,
-      email: req.user.email
-    }
-  });
+// @desc    Get user profile (dynamic - works with or without token)
+// @route   GET /api/auth/profile
+// @access  Public/Private (dynamic)
+const getProfile = asyncHandler(async (req, res) => {
+  // Check if user is authenticated (token provided and valid)
+  if (req.user) {
+    // User is authenticated - return full profile
+    return res.status(200).json({
+      success: true,
+      authenticated: true,
+      data: {
+        id: req.user._id,
+        name: req.user.name,
+        email: req.user.email,
+        createdAt: req.user.createdAt,
+        updatedAt: req.user.updatedAt
+      }
+    });
+  } else {
+    // User is not authenticated - return public message
+    return res.status(200).json({
+      success: true,
+      authenticated: false,
+      message: 'Please login to view your profile',
+      data: null
+    });
+  }
 });
 
 
-module.exports = {register, login, getMe};
+module.exports = {register, login, getProfile};

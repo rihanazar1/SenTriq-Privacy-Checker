@@ -1,16 +1,24 @@
+// utils/jwt.js
 const jwt = require('jsonwebtoken');
 
-const generateToken = (payload) => {
+// Generate JWT Token
+const generateToken = (user) => {
+  const payload = {
+    id: user.id || user._id,
+    email: user.email,
+  };
+
   return jwt.sign(payload, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRES_IN || '7d'
+    expiresIn: process.env.JWT_EXPIRES_IN || '7d',
   });
 };
 
+// Verify JWT Token
 const verifyToken = (token) => {
   return jwt.verify(token, process.env.JWT_SECRET);
 };
 
 module.exports = {
   generateToken,
-  verifyToken
+  verifyToken,
 };
