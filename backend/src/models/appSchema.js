@@ -2,7 +2,6 @@ const mongoose = require('mongoose');
 
 const AppSchema = new mongoose.Schema(
   {
-    // 📱 Basic app info
     appName: {
       type: String,
       required: [true, 'App name is required'],
@@ -23,7 +22,6 @@ const AppSchema = new mongoose.Schema(
       index: true
     },
 
-    // 🔐 Privacy & permission flags
     permissions: {
       contactsAccess: { type: Boolean, default: false },
       locationAccess: { type: Boolean, default: false },
@@ -38,7 +36,6 @@ const AppSchema = new mongoose.Schema(
       networkInfoAccess: { type: Boolean, default: false },
     },
 
-    // 📧 User data fields (actual values, not permissions)
     userEmail: {
       type: String,
       trim: true,
@@ -64,7 +61,6 @@ const AppSchema = new mongoose.Schema(
       }
     },
 
-        // 👤 User relationship
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
@@ -72,7 +68,6 @@ const AppSchema = new mongoose.Schema(
       index: true
     },
 
-    // 📊 Risk assessment results
     riskScore: {
       type: Number,
       min: 0,
@@ -86,13 +81,11 @@ const AppSchema = new mongoose.Schema(
       index: true
     },
 
-    // 🔍 Breach information
     domainBreaches: {
       count: { type: Number, default: 0 },
       lastChecked: { type: Date, default: Date.now }
     },
 
-    // 📈 Tracking metadata
     isActive: {
       type: Boolean,
       default: true,

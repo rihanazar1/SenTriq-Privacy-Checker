@@ -3,6 +3,9 @@ const cors = require("cors");
 const errorHandler = require('./middleware/errorHandler');
 const authRoutes = require('./routes/auth.Routes');
 const appRoutes = require('./routes/app.Routes');
+const vaultRoutes = require('./routes/vault.Routes');
+const fakeDataRoutes = require('./routes/fakeData.Routes');
+const emailBreachRoutes = require('./routes/emailBreach.Routes');
 const { createGeneralLimiter, createAuthLimiter } = require('./middleware/rateLimiter');
 
 const app = express();
@@ -22,6 +25,9 @@ app.use(generalLimiter);
 // Routes
 app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/apps', appRoutes);
+app.use('/api/vault', vaultRoutes);
+app.use('/api/fake-data', fakeDataRoutes);
+app.use('/api/email-breach', emailBreachRoutes);
 
 // Health check route
 app.get('/api/health', (req, res) => {
@@ -44,6 +50,10 @@ app.get('/api', (req, res) => {
         register: 'POST /api/auth/register',
         login: 'POST /api/auth/login',
         profile: 'GET /api/auth/profile',
+        updateProfile: 'PUT /api/auth/profile',
+        changePassword: 'PUT /api/auth/change-password',
+        deleteAccount: 'DELETE /api/auth/profile',
+        dashboard: 'GET /api/auth/dashboard',
         me: 'GET /api/auth/me'
       },
       apps: {
@@ -53,6 +63,25 @@ app.get('/api', (req, res) => {
         getApp: 'GET /api/apps/:id',
         updateApp: 'PUT /api/apps/:id',
         deleteApp: 'DELETE /api/apps/:id'
+      },
+      vault: {
+        create: 'POST /api/vault',
+        getAll: 'GET /api/vault',
+        getStats: 'GET /api/vault/stats',
+        decrypt: 'POST /api/vault/:id/decrypt',
+        update: 'PUT /api/vault/:id',
+        delete: 'DELETE /api/vault/:id'
+      },
+      fakeData: {
+        generate: 'POST /api/fake-data/generate',
+        fields: 'GET /api/fake-data/fields',
+        sample: 'GET /api/fake-data/sample'
+      },
+      emailBreach: {
+        scan: 'POST /api/email-breach/scan',
+        stats: 'GET /api/email-breach/stats',
+        trends: 'GET /api/email-breach/trends',
+        search: 'GET /api/email-breach/search'
       }
     }
   });

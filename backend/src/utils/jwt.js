@@ -13,6 +13,17 @@ const generateToken = (user) => {
   });
 };
 
+const generateRefreshToken = (user) => {
+  const payload = {
+    id: user.id || user._id,
+    email: user.email,
+  };
+
+  return jwt.sign(payload, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_EXPIRES_IN || '14d',
+  });
+};
+
 // Verify JWT Token
 const verifyToken = (token) => {
   return jwt.verify(token, process.env.JWT_SECRET);
@@ -20,5 +31,6 @@ const verifyToken = (token) => {
 
 module.exports = {
   generateToken,
+  generateRefreshToken,
   verifyToken,
 };

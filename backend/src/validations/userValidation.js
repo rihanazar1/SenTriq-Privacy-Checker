@@ -60,10 +60,26 @@ const updateValidationSchema = yup.object({
     .optional(),
 });
 
+// Change password validation schema
+const changePasswordSchema = yup.object({
+  currentPassword: yup
+    .string()
+    .required('Current password is required'),
 
+  newPassword: yup
+    .string()
+    .required('New password is required')
+    .min(6, 'New password must be at least 6 characters long')
+    .max(128, 'New password cannot exceed 128 characters')
+    .matches(
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
+      'New password must contain at least one uppercase letter, one lowercase letter, and one number'
+    )
+});
 
 module.exports = {
   registerValidationSchema,
   loginValidationSchema,
   updateValidationSchema,
+  changePasswordSchema,
 };

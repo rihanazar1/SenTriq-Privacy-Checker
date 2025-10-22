@@ -36,10 +36,7 @@ router.get('/stats', getUserAppStats);
 router.get('/:id', getApp);
 
 
-router.put('/:id',
-  validate(appUpdateSchema),
-  updateApp
-);
+router.put('/:id', validate(appUpdateSchema), updateApp );
 
 
 router.delete('/:id', deleteApp);

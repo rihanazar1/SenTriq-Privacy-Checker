@@ -26,8 +26,7 @@ const extractDomain = (rawUrl) => {
   }
 };
 
-// Check domain breaches with Redis caching
-// Check domain breaches with Redis/Memory caching
+
 const checkDomainBreaches = async (domain) => {
   if (!domain) return 0;
 
@@ -85,7 +84,6 @@ const checkDomainBreaches = async (domain) => {
   }
 };
 
-// Calculate risk score with configurable weights
 const calculateRiskScore = (permissions, userEmail, userPhoneNumber, breachCount, weights = DEFAULT_WEIGHTS) => {
   // 1. Base score from permissions and user data
   let rawScore = 0;
@@ -159,10 +157,7 @@ const checkAppRisk = asyncHandler(async (req, res) => {
     userPhoneNumber: !!userPhoneNumber
   };
 
-  // Generate suggestions
-//   const suggestions = generateSuggestions(combinedPermissions, scoreData.urlModifier, riskLevel);
 
-  // Save to database if requested
   let savedRecord = null;
   if (save) {
     // Check if app already exists for this user
