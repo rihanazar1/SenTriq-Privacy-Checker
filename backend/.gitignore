@@ -49,7 +49,6 @@ docs/
 test-data/
 
 # JSON files
-*.json
 postman/
 *.tsbuildinfo
 
