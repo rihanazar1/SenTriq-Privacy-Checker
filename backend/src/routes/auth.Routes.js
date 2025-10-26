@@ -29,9 +29,9 @@ router.post('/login', validate(loginValidationSchema), login);
 router.get('/profile', protect, getProfile);
 
 // Protected routes
-router.put('/profile', protect, validate(updateValidationSchema), updateProfile);
+router.put('/update-profile', protect, validate(updateValidationSchema), updateProfile);
 router.put('/change-password', protect, validate(changePasswordSchema), changePassword);
-router.delete('/profile', protect, deleteAccount);
+router.delete('/delete-profile', protect, deleteAccount);
 router.get('/dashboard', protect, getDashboard);
 router.post('/refresh-token', protect, refreshToken);
 

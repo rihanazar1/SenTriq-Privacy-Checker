@@ -47,7 +47,7 @@ const Home: React.FC = () => {
   ]
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 text-white relative overflow-hidden">
+    <div className="min-h-screen bg-[#0A191F] text-white relative overflow-hidden">
 
 
 

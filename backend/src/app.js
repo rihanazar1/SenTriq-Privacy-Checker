@@ -19,17 +19,14 @@ app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Apply general rate limiting to all routes
 app.use(generalLimiter);
 
-// Routes
 app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/apps', appRoutes);
 app.use('/api/vault', vaultRoutes);
 app.use('/api/fake-data', fakeDataRoutes);
 app.use('/api/email-breach', emailBreachRoutes);
 
-// Health check route
 app.get('/api/health', (req, res) => {
   res.status(200).json({
     success: true,
@@ -39,7 +36,6 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// API documentation route
 app.get('/api', (req, res) => {
   res.status(200).json({
     success: true,
