@@ -137,7 +137,7 @@ const checkAppRisk = asyncHandler(async (req, res) => {
   const { appName, url, permissions = {}, userEmail, userPhoneNumber, save = true } = req.body;
   const userId = req.user._id;
 
-  // Extract domain if URL provided
+  // Extract domain if URL provided 
   let domain = null;
   if (url) {
     domain = extractDomain(url);

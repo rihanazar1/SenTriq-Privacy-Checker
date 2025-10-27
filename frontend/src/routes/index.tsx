@@ -6,7 +6,7 @@ import Register from "../pages/auth/register";
 import EmailBreachCheacker from "../pages/emailBreachCheacker/EmailBreachCheacker";
 import DataVault from "../pages/vault/DataVault";
 import FakeDataGenerator from "../pages/fakeDataGenerator/FakeDataGenerator";
-import AppsTracker from "../pages/appsTracker/AppsTracker";
+import AppTrackerPage from "../pages/appsTracker/AppTrackerPage";
 
 function isTokenExpired(token: string): boolean {
   try {
@@ -52,7 +52,7 @@ export const Router = createBrowserRouter([
       { path: "/email-checker", element: <EmailBreachCheacker /> },
       { path: "/data-vault", element: <DataVault /> },
       { path: "/fake-data-generator", element: <FakeDataGenerator /> },
-      { path: "/apps-tracker", element: <AppsTracker /> },
+      { path: "/apps-tracker", element: <AppTrackerPage /> },
     ],
   },
 ])
