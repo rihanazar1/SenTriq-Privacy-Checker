@@ -2,21 +2,19 @@ import { baseApi } from "./baseApi";
 
 // Types and Interfaces
 export interface AppPermissions {
-  camera?: boolean;
-  microphone?: boolean;
-  location?: boolean;
-  contacts?: boolean;
-  storage?: boolean;
-  sms?: boolean;
-  phone?: boolean;
-  calendar?: boolean;
-  photos?: boolean;
-  notifications?: boolean;
-  deviceInfo?: boolean;
-  networkAccess?: boolean;
-  bluetooth?: boolean;
-  nfc?: boolean;
-  biometric?: boolean;
+  paymentInfoAccess?: boolean;
+  healthDataAccess?: boolean;
+  userEmail?: boolean;
+  userPhoneNumber?: boolean;
+  smsAccess?: boolean;
+  callLogsAccess?: boolean;
+  locationAccess?: boolean;
+  cameraMicrophoneAccess?: boolean;
+  storageAccess?: boolean;
+  cookiesOrTrackers?: boolean;
+  deviceIdAccess?: boolean;
+  contactsAccess?: boolean;
+  networkInfoAccess?: boolean;
   [key: string]: boolean | undefined;
 }
 
@@ -35,7 +33,7 @@ export interface App {
   userEmail?: string;
   userPhoneNumber?: string;
   riskScore: number;
-  riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  riskLevel: 'Low' | 'Medium' | 'High' | 'Critical';
   domainBreaches?: DomainBreaches;
   isActive: boolean;
   createdAt: string;
@@ -70,7 +68,7 @@ export interface CheckAppRiskResponse {
     userEmail?: string;
     userPhoneNumber?: string;
     riskScore: number;
-    riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+    riskLevel: 'Low' | 'Medium' | 'High' | 'Critical';
     breakdown: RiskBreakdown;
     permissions: AppPermissions;
     savedRecord?: { id: string } | null;
@@ -80,7 +78,7 @@ export interface CheckAppRiskResponse {
 export interface GetUserAppsRequest {
   page?: number;
   limit?: number;
-  riskLevel?: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  riskLevel?: 'Low' | 'Medium' | 'High' | 'Critical';
   sortBy?: 'createdAt' | 'riskScore' | 'appName' | 'lastRiskCheck';
   sortOrder?: 'asc' | 'desc';
   search?: string;
@@ -102,7 +100,7 @@ export interface GetUserAppsResponse {
 }
 
 export interface RiskDistribution {
-  _id: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  _id: 'Low' | 'Medium' | 'High' | 'Critical';
   count: number;
   avgScore: number;
 }
@@ -111,7 +109,7 @@ export interface HighRiskApp {
   _id: string;
   appName: string;
   riskScore: number;
-  riskLevel: 'HIGH' | 'CRITICAL';
+  riskLevel: 'High' | 'Critical';
   domainBreaches?: DomainBreaches;
 }
 
@@ -176,7 +174,7 @@ export const appsApi = baseApi.injectEndpoints({
     // Get user apps with pagination and filters
     getUserApps: builder.query<GetUserAppsResponse, GetUserAppsRequest | void>({
       query: (params: GetUserAppsRequest = {}) => ({
-        url: "/apps",
+        url: "/apps/",
         params, // always an object now
       }),
       providesTags: (result) =>

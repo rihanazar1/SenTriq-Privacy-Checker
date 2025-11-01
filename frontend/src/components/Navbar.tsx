@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import images from '../assets/';
+import { useNavigate } from 'react-router-dom';
 
 const Navbar: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -7,6 +8,8 @@ const Navbar: React.FC = () => {
   const toggleMenu = () => setIsMenuOpen(prev => !prev);
 
   const menuItems = ['Home', 'Features', 'Get Started', 'Login'];
+
+  const navigate = useNavigate()
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 md:px-12 py-4 backdrop-blur-xl bg-slate-900/40 shadow-lg border-b border-b-gray-700">
@@ -19,7 +22,7 @@ const Navbar: React.FC = () => {
 
       {/* Desktop Menu */}
       <div className="hidden md:flex items-center space-x-6">
-        <button className="text-white cursor-pointer hover:text-green-400 font-medium transition-colors">Home</button>
+        <button onClick={() => navigate('/')} className="text-white cursor-pointer hover:text-[#9ee926] font-medium transition-colors" >Home</button>
         <button className="text-white cursor-pointer hover:text-[#9ee926] font-medium transition-colors">Features</button>
         <button className="bg-[#a2e535] cursor-pointer text-black px-6 py-2 rounded-full font-semibold hover:bg-[#c7e595] transition-all shadow-md">
           Get Started

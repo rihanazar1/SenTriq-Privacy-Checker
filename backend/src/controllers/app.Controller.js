@@ -12,7 +12,7 @@ const {
   BREACH_MULTIPLIER,
   calculateMaxPossible,
   getRiskLevel,
-//   generateSuggestions
+  //   generateSuggestions
 } = require('../config/riskWeights');
 
 // Extract domain from URL
@@ -37,7 +37,7 @@ const checkDomainBreaches = async (domain) => {
   if (cached === null && !isRedisAvailable()) {
     cached = memoryCache.get(cacheKey);
   }
-  
+
   if (cached !== null) {
     return cached;
   }
@@ -84,7 +84,16 @@ const checkDomainBreaches = async (domain) => {
   }
 };
 
-const calculateRiskScore = (permissions, userEmail, userPhoneNumber, breachCount, weights = DEFAULT_WEIGHTS) => {
+const calculateRiskScore = (permissions = {}, userEmail, userPhoneNumber, breachCount = 0, weights = DEFAULT_WEIGHTS) => {
+  // Validate inputs
+  if (!permissions || typeof permissions !== 'object') {
+    permissions = {};
+  }
+
+  if (typeof breachCount !== 'number' || isNaN(breachCount)) {
+    breachCount = 0;
+  }
+
   // 1. Base score from permissions and user data
   let rawScore = 0;
   for (const [field, weight] of Object.entries(weights)) {
@@ -92,7 +101,7 @@ const calculateRiskScore = (permissions, userEmail, userPhoneNumber, breachCount
       rawScore += weight;
     } else if (field === 'userPhoneNumber' && userPhoneNumber) {
       rawScore += weight;
-    } else if (permissions[field]) {
+    } else if (permissions[field] === true) { // Explicitly check for true
       rawScore += weight;
     }
   }
@@ -103,7 +112,7 @@ const calculateRiskScore = (permissions, userEmail, userPhoneNumber, breachCount
     const hasAllConditions = rule.conditions.every(condition => {
       if (condition === 'userEmail') return !!userEmail;
       if (condition === 'userPhoneNumber') return !!userPhoneNumber;
-      return permissions[condition];
+      return permissions[condition] === true; // Explicitly check for true
     });
     if (hasAllConditions) {
       synergyPenalty += rule.penalty;
@@ -118,16 +127,24 @@ const calculateRiskScore = (permissions, userEmail, userPhoneNumber, breachCount
 
   const totalRaw = rawScore + synergyPenalty + urlModifier;
   const maxPossible = calculateMaxPossible(weights);
-  const normalized = Math.round((totalRaw / maxPossible) * 100);
+
+  // Prevent division by zero and ensure valid calculation
+  let normalized = 0;
+  if (maxPossible > 0) {
+    normalized = Math.round((totalRaw / maxPossible) * 100);
+  }
+
+  // Ensure normalized score is within valid range
+  normalized = Math.max(0, Math.min(100, normalized));
 
   return {
-    rawScore,
-    synergyPenalty,
-    urlModifier,
-    totalRaw,
-    normalized,
-    maxPossible,
-    breachCount
+    rawScore: rawScore || 0,
+    synergyPenalty: synergyPenalty || 0,
+    urlModifier: urlModifier || 0,
+    totalRaw: totalRaw || 0,
+    normalized: normalized || 0,
+    maxPossible: maxPossible || 0,
+    breachCount: breachCount || 0
   };
 };
 
@@ -136,6 +153,9 @@ const calculateRiskScore = (permissions, userEmail, userPhoneNumber, breachCount
 const checkAppRisk = asyncHandler(async (req, res) => {
   const { appName, url, permissions = {}, userEmail, userPhoneNumber, save = true } = req.body;
   const userId = req.user._id;
+
+  // Debug: Log received permissions
+  console.log('Received permissions:', JSON.stringify(permissions, null, 2));
 
   // Extract domain if URL provided 
   let domain = null;
@@ -146,9 +166,12 @@ const checkAppRisk = asyncHandler(async (req, res) => {
   // Check domain breaches
   const breachCount = domain ? await checkDomainBreaches(domain) : 0;
 
-  // Calculate risk score
+  // Calculate risk score with validation
   const scoreData = calculateRiskScore(permissions, userEmail, userPhoneNumber, breachCount);
-  const riskLevel = getRiskLevel(scoreData.normalized);
+
+  // Ensure valid risk score
+  const validScore = isNaN(scoreData.normalized) ? 0 : Math.max(0, Math.min(100, scoreData.normalized));
+  const riskLevel = getRiskLevel(validScore);
 
   // Create combined permissions object for suggestions (includes user data flags)
   const combinedPermissions = {
@@ -170,7 +193,7 @@ const checkAppRisk = asyncHandler(async (req, res) => {
       existingApp.permissions = permissions;
       existingApp.userEmail = userEmail || null;
       existingApp.userPhoneNumber = userPhoneNumber || null;
-      existingApp.riskScore = scoreData.normalized;
+      existingApp.riskScore = validScore;
       existingApp.riskLevel = riskLevel;
       existingApp.domainBreaches = {
         count: breachCount,
@@ -189,7 +212,7 @@ const checkAppRisk = asyncHandler(async (req, res) => {
         permissions,
         userEmail: userEmail || null,
         userPhoneNumber: userPhoneNumber || null,
-        riskScore: scoreData.normalized,
+        riskScore: validScore,
         riskLevel,
         domainBreaches: {
           count: breachCount,
@@ -207,7 +230,7 @@ const checkAppRisk = asyncHandler(async (req, res) => {
       domain,
       userEmail,
       userPhoneNumber,
-      riskScore: scoreData.normalized,
+      riskScore: validScore,
       riskLevel,
       breakdown: {
         baseScore: scoreData.rawScore,
@@ -217,7 +240,7 @@ const checkAppRisk = asyncHandler(async (req, res) => {
         maxPossible: scoreData.maxPossible,
         breachCount: scoreData.breachCount
       },
-    //   suggestions,
+      //   suggestions,
       permissions,
       savedRecord: savedRecord ? { id: savedRecord._id } : null
     }
@@ -228,6 +251,14 @@ const checkAppRisk = asyncHandler(async (req, res) => {
 
 
 const getUserApps = asyncHandler(async (req, res) => {
+  // Debug: Check if user exists
+  if (!req.user) {
+    return res.status(401).json({
+      success: false,
+      error: 'User not authenticated - req.user is missing'
+    });
+  }
+
   const userId = req.user._id;
   const {
     page = 1,
@@ -328,20 +359,84 @@ const updateApp = asyncHandler(async (req, res) => {
     }
   });
 
-  // Recalculate risk if permissions changed
-  if (updates.permissions) {
-    const breachCount = app.domainBreaches?.count || 0;
-    const scoreData = calculateRiskScore(updates.permissions, breachCount);
-    app.riskScore = scoreData.normalized;
-    app.riskLevel = getRiskLevel(scoreData.normalized);
+  // Check if we need to recalculate risk score
+  const needsRiskRecalculation = updates.permissions ||
+    updates.userEmail !== undefined ||
+    updates.userPhoneNumber !== undefined ||
+    updates.url !== undefined;
+
+  if (needsRiskRecalculation) {
+    // Get updated domain if URL changed
+    let domain = app.domain;
+    let breachCount = app.domainBreaches?.count || 0;
+
+    if (updates.url) {
+      domain = extractDomain(updates.url);
+      app.domain = domain;
+      // Recalculate breach count for new domain
+      breachCount = await checkDomainBreaches(domain);
+      app.domainBreaches = {
+        count: breachCount,
+        lastChecked: new Date()
+      };
+    }
+
+    // Use updated values for risk calculation
+    const permissions = updates.permissions || app.permissions || {};
+    const userEmail = app.userEmail; // Already updated above
+    const userPhoneNumber = app.userPhoneNumber; // Already updated above
+
+    console.log('Recalculating risk with:', {
+      permissions,
+      userEmail,
+      userPhoneNumber,
+      breachCount,
+      domain
+    });
+
+    const scoreData = calculateRiskScore(permissions, userEmail, userPhoneNumber, breachCount);
+
+    // Ensure score is a valid number
+    if (isNaN(scoreData.normalized) || scoreData.normalized === null || scoreData.normalized === undefined) {
+      app.riskScore = 0;
+      app.riskLevel = 'Low';
+    } else {
+      app.riskScore = Math.max(0, Math.min(100, scoreData.normalized)); // Clamp between 0-100
+      app.riskLevel = getRiskLevel(app.riskScore);
+    }
+
     app.lastRiskCheck = new Date();
+
+    console.log('Updated risk score:', app.riskScore, 'Risk level:', app.riskLevel);
   }
 
   const updatedApp = await app.save();
 
+  // If risk was recalculated, include breakdown in response
+  let responseData = updatedApp.toObject();
+
+  if (needsRiskRecalculation) {
+    const permissions = updatedApp.permissions || {};
+    const userEmail = updatedApp.userEmail;
+    const userPhoneNumber = updatedApp.userPhoneNumber;
+    const breachCount = updatedApp.domainBreaches?.count || 0;
+
+    const scoreData = calculateRiskScore(permissions, userEmail, userPhoneNumber, breachCount);
+
+    responseData.riskBreakdown = {
+      baseScore: scoreData.rawScore,
+      synergyPenalty: scoreData.synergyPenalty,
+      breachModifier: scoreData.urlModifier,
+      totalRaw: scoreData.totalRaw,
+      maxPossible: scoreData.maxPossible,
+      breachCount: scoreData.breachCount,
+      recalculated: true
+    };
+  }
+
   return res.json({
     success: true,
-    data: updatedApp
+    data: responseData
   });
 });
 

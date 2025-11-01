@@ -9,21 +9,32 @@ export interface EmailBreachScanRequest {
 export interface BreachRecord {
   name: string;               // e.g. "Adobe"
   domain?: string;            // e.g. "adobe.com"
-  breachDate: string;         // e.g. "2013-10-04"
-  addedDate: string;          // when it was added to DB
+  breachDate: string | null;  // e.g. "2013-10-04" or null
+  addedDate: string | null;   // when it was added to DB or null
+  modifiedDate: string | null; // when it was modified or null
   dataClasses: string[];      // e.g. ["Email addresses", "Passwords"]
   description?: string;       // optional text about the breach
-  verified: boolean;          // true if verified
+  isVerified: boolean;        // true if verified
+  isFabricated: boolean;      // true if fabricated
+  isRetired: boolean;         // true if retired
+  isSensitive: boolean;       // true if sensitive
+  isSpamList: boolean;        // true if spam list
   pwnCount?: number;          // number of affected accounts
   logoPath?: string;          // optional logo URL
 }
 
 // 🔹 Response for scanning an email
 export interface EmailBreachScanResponse {
-  email: string;
-  breaches: BreachRecord[];
-  totalBreaches: number;
-  riskLevel: "LOW" | "MEDIUM" | "HIGH";
+  success: boolean;
+  message: string;
+  data: {
+    email: string;
+    breaches: BreachRecord[];
+    breachCount: number;
+    riskLevel: "Low" | "Medium" | "High";
+    riskScore: number;
+    scannedAt: string;
+  };
 }
 
 // 🔹 Stats endpoint response

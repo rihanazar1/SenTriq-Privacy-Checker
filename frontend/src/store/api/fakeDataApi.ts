@@ -31,8 +31,9 @@ export interface AvailableFieldsResponse {
 }
 
 export interface SampleDataResponse {
-  samples: Record<string, string | number | boolean | null>;
-  fieldCount: number;
+  success: boolean;
+  message: string;
+  data: Record<string, any>;
 }
 
 
