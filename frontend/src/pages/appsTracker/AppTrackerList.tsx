@@ -44,7 +44,7 @@ const AppTrackerList = ({ apps, isLoading, error, onEdit, onDelete }: AppTracker
 
   if (!apps || apps.length === 0) {
     return (
-      <div className="bg-gray-800/50 backdrop-blur-sm rounded-lg p-8 h-80 flex justify-center items-center">
+      <div className="bg-gray-800/50 backdrop-blur-sm border-1 border-[#A3E635] rounded-lg p-8 h-80 flex justify-center items-center">
         <p className="text-gray-300">No apps found. Add your first app to get started!</p>
       </div>
     )

@@ -4,7 +4,7 @@ import Navbar from '../../components/Navbar'
 import Particles from '../../components/Particles'
 import AppTrackerForm from './AppTrackerForm'
 import AppTrackerList from './AppTrackerList'
-import { useGetUserAppsQuery, useDeleteAppMutation, useUpdateAppMutation} from '../../store/api/appsApi'
+import { useGetUserAppsQuery, useDeleteAppMutation, useUpdateAppMutation, useCheckAppRiskMutation} from '../../store/api/appsApi'
 import type { App } from '../../store/api/appsApi'
 import type { UpdateAppRequest } from '../../store/api/appsApi'
 import { toast } from 'react-hot-toast'
@@ -25,7 +25,7 @@ const AppTrackerPage = () => {
 
   const [deleteApp] = useDeleteAppMutation()
   const [updateApp] = useUpdateAppMutation()
-  // const [checkAppRisk] = useCheckAppRiskMutation()
+  const [checkAppRisk] = useCheckAppRiskMutation()
 
   const handleAddApp = () => {
     setEditingApp(null)
@@ -71,7 +71,7 @@ const AppTrackerPage = () => {
         await handleUpdateApp(editingApp._id, formData)
       } else {
         // Add new app
-        // const result = await checkAppRisk({ ...formData, save: true }).unwrap()
+        const result = await checkAppRisk({ ...formData, save: true }).unwrap()
         toast.success('App added successfully')
         setIsFormOpen(false)
         refetch()

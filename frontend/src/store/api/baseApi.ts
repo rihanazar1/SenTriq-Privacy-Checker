@@ -27,7 +27,29 @@ export const baseQueryWithReauth: BaseQueryFn<
 > = async (args, api, extraOptions) => {
   const result = await baseQuery(args, api, extraOptions);
 
+  // Only remove token if it's actually an authentication error, not validation errors
   if (result.error && result.error.status === 401) {
+    const errorData = result.error.data as any;
+    
+    // Don't remove token for these specific validation errors
+    const validationErrors = [
+      'Invalid master password',
+      'master password',
+      'Master password',
+      'Invalid password'
+    ];
+    
+    const isValidationError = validationErrors.some(errorText => 
+      errorData?.error?.includes(errorText) || 
+      errorData?.message?.includes(errorText)
+    );
+    
+    if (isValidationError) {
+      // Don't remove token for validation errors
+      return result;
+    }
+    
+    // Only remove token for actual authentication failures (expired/invalid token)
     localStorage.removeItem("token");
     (
       result.error as FetchBaseQueryError & { isAuthExpired?: boolean }

@@ -8,6 +8,7 @@ import img6 from "./images/img-6.png"
 import img7 from "./images/img-7.png"
 import img8 from "./images/img-8.webp"
 import img9 from "./images/img-9.png"
+import img10 from "./images/img-10.gif"
 
 // export {
 //     logo,
@@ -33,4 +34,5 @@ export default {
     img7,
     img8,
     img9,
+    img10,
 };

@@ -1,43 +1,39 @@
 import { baseApi } from "./baseApi";
 
 export interface CreateVaultEntryRequest {
-  title: string;
-  username?: string;
-  password?: string;
-  url?: string;
+  applicationName: string;
+  websiteUrl?: string;
+  username: string;
+  password: string;
   notes?: string;
-  category?: string;
+  masterPassword: string;
 }
 
 export interface VaultEntry {
-  id: string;
-  title: string;
-  username?: string;
-  url?: string;
-  notes?: string;
-  category?: string;
+  _id: string;
+  applicationName: string;
+  websiteUrl?: string;
+  lastAccessed?: string;
   createdAt: string;
-  updatedAt: string;
+  updatedAt?: string;
 }
 
 export interface VaultEntriesQuery {
-  category?: string;
   search?: string;
-  limit?: number;
-  offset?: number;
 }
 
 export interface VaultEntriesResponse {
-  entries: VaultEntry[];
-  total: number;
-  limit: number;
-  offset: number;
+  success: boolean;
+  count: number;
+  data: VaultEntry[];
 }
 
 export interface VaultStatsResponse {
-  totalEntries: number;
-  categoryCounts: Record<string, number>;
-  recentActivity: any[];
+  success: boolean;
+  data: {
+    totalEntries: number;
+    recentEntries: number;
+  };
 }
 
 export interface DecryptEntryRequest {
@@ -45,22 +41,39 @@ export interface DecryptEntryRequest {
 }
 
 export interface DecryptedEntryResponse {
-  id: string;
-  title: string;
-  username?: string;
-  password?: string;
-  url?: string;
+  success: boolean;
+  data: {
+    id: string;
+    applicationName: string;
+    websiteUrl?: string;
+    username: string;
+    password: string;
+    notes?: string;
+    lastAccessed: string;
+    createdAt: string;
+    updatedAt: string;
+  };
+}
+
+export interface DecryptedEntry {
+  _id: string;
+  applicationName: string;
+  websiteUrl?: string;
+  username: string;
+  password: string;
   notes?: string;
-  category?: string;
+  lastAccessed: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface UpdateVaultEntryRequest {
-  title?: string;
+  applicationName?: string;
+  websiteUrl?: string;
   username?: string;
   password?: string;
-  url?: string;
   notes?: string;
-  category?: string;
+  masterPassword: string;
 }
 
 export const vaultApi = baseApi.injectEndpoints({
@@ -104,10 +117,11 @@ export const vaultApi = baseApi.injectEndpoints({
       invalidatesTags: ["Vault"],
     }),
     
-    deleteVaultEntry: builder.mutation<void, string>({
-      query: (id) => ({
+    deleteVaultEntry: builder.mutation<void, { id: string; data: DecryptEntryRequest }>({
+      query: ({ id, data }) => ({
         url: `/vault/${id}`,
         method: "DELETE",
+        body: data,
       }),
       invalidatesTags: ["Vault"],
     }),

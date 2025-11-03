@@ -8,6 +8,7 @@ const userSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
+
     email: {
       type: String,
       required: true,
@@ -16,10 +17,48 @@ const userSchema = new mongoose.Schema(
       trim: true,
       index: true,
     },
+
     password: {
       type: String,
       required: true,
       select: false, // Don’t include password by default
+    },
+
+    resetPasswordCode: {
+      type: String,
+      select: false,
+    },
+
+    resetPasswordExpire: {
+      type: Date,
+      select: false,
+    },
+
+    isEmailVerified: {
+      type: Boolean,
+      default: false,
+    },
+
+    role: {
+      type: String,
+      enum: ['user', 'admin'],
+      default: 'user',
+    },
+
+    isDeleted: {
+      type: Number,
+      default: 1, // 1 = active, 0 = deleted
+      index: true,
+    },
+
+    deletedAt: {
+      type: Date,
+      default: null,
+    },
+    
+    isActive: {
+      type: Boolean,
+      default: true, // Admin can activate/deactivate users
     },
   },
   {
@@ -43,6 +82,86 @@ userSchema.pre('save', async function (next) {
 // Compare password method
 userSchema.methods.comparePassword = async function (candidatePassword) {
   return await bcrypt.compare(candidatePassword, this.password);
+};
+
+// Generate password reset code
+userSchema.methods.generateResetPasswordCode = async function () {
+  // Generate 6-digit code
+  const resetCode = Math.floor(100000 + Math.random() * 900000).toString();
+
+  // Hash code using bcrypt
+  const salt = await bcrypt.genSalt(10);
+  this.resetPasswordCode = await bcrypt.hash(resetCode, salt);
+
+  // Set expire time (10 minutes)
+  this.resetPasswordExpire = Date.now() + 10 * 60 * 1000;
+
+  return resetCode;
+};
+
+// Verify reset password code
+userSchema.methods.verifyResetPasswordCode = async function (code) {
+  if (!this.resetPasswordCode || !this.resetPasswordExpire) {
+    return false;
+  }
+
+  // Check if code is expired
+  if (Date.now() > this.resetPasswordExpire) {
+    return false;
+  }
+
+  // Compare code with hashed version
+  return await bcrypt.compare(code, this.resetPasswordCode);
+};
+
+// Clear reset password fields
+userSchema.methods.clearResetPasswordFields = function () {
+  this.resetPasswordCode = undefined;
+  this.resetPasswordExpire = undefined;
+};
+
+// Soft delete user
+userSchema.methods.softDelete = function () {
+  this.isDeleted = 0;
+  this.deletedAt = new Date();
+  return this.save();
+};
+
+// Restore deleted user
+userSchema.methods.restore = function () {
+  this.isDeleted = 1;
+  this.deletedAt = null;
+  return this.save();
+};
+
+// Check if user is admin
+userSchema.methods.isAdmin = function () {
+  return this.role === 'admin';
+};
+
+// Activate/Deactivate user (admin only)
+userSchema.methods.toggleActiveStatus = function () {
+  this.isActive = !this.isActive;
+  return this.save();
+};
+
+// Query middleware to exclude deleted users by default
+userSchema.pre(/^find/, function (next) {
+  // Only apply if isDeleted filter is not already set
+  if (!this.getQuery().isDeleted) {
+    this.find({ isDeleted: 1 });
+  }
+  next();
+});
+
+// Static method to find deleted users (admin only)
+userSchema.statics.findDeleted = function () {
+  return this.find({ isDeleted: 0 });
+};
+
+// Static method to find all users including deleted (admin only)
+userSchema.statics.findWithDeleted = function () {
+  return this.find({});
 };
 
 // Static method to get user dashboard statistics

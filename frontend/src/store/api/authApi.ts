@@ -37,7 +37,7 @@ export interface RegisterResponse {
 
 export interface ProfileResponse {
   success: boolean;
-  user: User;
+  data: User;
 }
 
 export interface UpdateProfileRequest {
@@ -49,6 +49,40 @@ export interface ChangePasswordRequest {
   currentPassword: string;
   newPassword: string;
   confirmPassword: string;
+}
+
+export interface SendResetCodeRequest {
+  email: string;
+}
+
+export interface SendResetCodeResponse {
+  success: boolean;
+  message: string;
+  code?: string; // Only for development
+}
+
+export interface VerifyResetCodeRequest {
+  email: string;
+  code: string;
+}
+
+export interface VerifyResetCodeResponse {
+  success: boolean;
+  message: string;
+  canResetPassword: boolean;
+}
+
+export interface ResetPasswordWithCodeRequest {
+  email: string;
+  code: string;
+  password: string;
+}
+
+export interface ResetPasswordWithCodeResponse {
+  success: boolean;
+  message: string;
+  token: string;
+  data: User;
 }
 
 export interface DashboardResponse {
@@ -85,7 +119,7 @@ export const authApi = baseApi.injectEndpoints({
 
     // Get user profile
     getProfile: builder.query<ProfileResponse, void>({
-      query: () => "/auth/profile",
+      query: () => "/auth/me",
       providesTags: ["User", "Auth"],
     }),
 
@@ -100,7 +134,7 @@ export const authApi = baseApi.injectEndpoints({
     }),
 
     // Change password
-    changePassword: builder.mutation<{ success: boolean; message: string }, ChangePasswordRequest>({
+    changePassword: builder.mutation<{ success: boolean; message: string }, { currentPassword: string; newPassword: string }>({
       query: (passwordData) => ({
         url: "/auth/change-password",
         method: "PUT",
@@ -138,6 +172,90 @@ export const authApi = baseApi.injectEndpoints({
       query: () => "/auth/me",
       providesTags: ["User", "Auth"],
     }),
+
+    // Send reset code
+    sendResetCode: builder.mutation<SendResetCodeResponse, SendResetCodeRequest>({
+      query: (data) => ({
+        url: "/auth/send-reset-code",
+        method: "POST",
+        body: data,
+      }),
+    }),
+
+    // Verify reset code
+    verifyResetCode: builder.mutation<VerifyResetCodeResponse, VerifyResetCodeRequest>({
+      query: (data) => ({
+        url: "/auth/verify-reset-code",
+        method: "POST",
+        body: data,
+      }),
+    }),
+
+    // Reset password with code
+    resetPasswordWithCode: builder.mutation<ResetPasswordWithCodeResponse, ResetPasswordWithCodeRequest>({
+      query: (data) => ({
+        url: "/auth/reset-password",
+        method: "POST",
+        body: data,
+      }),
+      invalidatesTags: ["Auth", "User"],
+    }),
+
+    // Admin endpoints
+    getAllUsers: builder.query<{
+      success: boolean;
+      data: {
+        users: User[];
+        pagination: {
+          currentPage: number;
+          totalPages: number;
+          totalUsers: number;
+          hasNext: boolean;
+          hasPrev: boolean;
+        };
+      };
+    }, { includeDeleted?: boolean; page?: number; limit?: number }>({
+      query: (params = {}) => ({
+        url: "/auth/admin/users",
+        params,
+      }),
+      providesTags: ["User"],
+    }),
+
+    toggleUserStatus: builder.mutation<{
+      success: boolean;
+      message: string;
+      data: { userId: string; isActive: boolean };
+    }, string>({
+      query: (userId) => ({
+        url: `/auth/admin/users/${userId}/toggle-status`,
+        method: "PATCH",
+      }),
+      invalidatesTags: ["User"],
+    }),
+
+    restoreUser: builder.mutation<{
+      success: boolean;
+      message: string;
+      data: { userId: string; isDeleted: number };
+    }, string>({
+      query: (userId) => ({
+        url: `/auth/admin/users/${userId}/restore`,
+        method: "PATCH",
+      }),
+      invalidatesTags: ["User"],
+    }),
+
+    permanentDeleteUser: builder.mutation<{
+      success: boolean;
+      message: string;
+    }, string>({
+      query: (userId) => ({
+        url: `/auth/admin/users/${userId}/permanent-delete`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["User"],
+    }),
   }),
 });
 
@@ -151,4 +269,12 @@ export const {
   useGetDashboardQuery,
   useRefreshTokenMutation,
   useGetMeQuery,
+  useSendResetCodeMutation,
+  useVerifyResetCodeMutation,
+  useResetPasswordWithCodeMutation,
+  // Admin hooks
+  useGetAllUsersQuery,
+  useToggleUserStatusMutation,
+  useRestoreUserMutation,
+  usePermanentDeleteUserMutation,
 } = authApi;

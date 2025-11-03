@@ -31,7 +31,8 @@ const register = asyncHandler(async (req, res) => {
     data: {
       id: user._id,
       name: user.name,
-      email: user.email
+      email: user.email,
+      role: user.role
     }
   });
 });
@@ -75,7 +76,8 @@ const login = asyncHandler(async (req, res) => {
     data: {
       id: user._id,
       name: user.name,
-      email: user.email
+      email: user.email,
+      role: user.role
     }
   });
 });
@@ -94,6 +96,7 @@ const getProfile = asyncHandler(async (req, res) => {
         id: req.user._id,
         name: req.user.name,
         email: req.user.email,
+        role: req.user.role,
         createdAt: req.user.createdAt,
         updatedAt: req.user.updatedAt
       }
@@ -188,12 +191,21 @@ const changePassword = asyncHandler(async (req, res) => {
 const deleteAccount = asyncHandler(async (req, res) => {
   const userId = req.user._id;
 
-  // Delete user's apps first
-  const App = require('../models/appSchema');
-  await App.deleteMany({ userId });
+  // Get user and soft delete
+  const user = await User.findById(userId);
+  if (!user) {
+    return res.status(404).json({
+      success: false,
+      error: 'User not found'
+    });
+  }
 
-  // Delete user account
-  await User.findByIdAndDelete(userId);
+  // Soft delete user account
+  await user.softDelete();
+
+  // Optionally soft delete user's apps as well
+  const App = require('../models/appSchema');
+  await App.updateMany({ userId }, { isActive: false });
 
   res.status(200).json({
     success: true,
@@ -231,9 +243,328 @@ const refreshToken = asyncHandler(async (req, res) => {
     data: {
       id: user._id,
       name: user.name,
-      email: user.email
+      email: user.email,
+      role: user.role
     }
   });
 });
 
-module.exports = { register, login, getProfile, updateProfile, changePassword, deleteAccount, getDashboard, refreshToken };
+// Send Password Reset Code
+const sendResetCode = asyncHandler(async (req, res) => {
+  const { email } = req.body;
+
+  const user = await User.findOne({ email });
+
+  if (!user) {
+    return res.status(404).json({
+      success: false,
+      error: 'No user found with that email'
+    });
+  }
+
+  // Generate reset code
+  const resetCode = await user.generateResetPasswordCode();
+  await user.save({ validateBeforeSave: false });
+
+  // Send email with verification code
+  const { sendVerificationCode } = require('../config/nodemailer');
+  
+  try {
+    const emailResult = await sendVerificationCode(user.email, resetCode, user.name);
+    
+    if (emailResult.success) {
+      res.status(200).json({
+        success: true,
+        message: 'Verification code sent to your email',
+        // For development only - remove in production
+        code: process.env.NODE_ENV === 'development' ? resetCode : undefined
+      });
+    } else {
+      // Clear the reset code if email failed
+      user.clearResetPasswordFields();
+      await user.save({ validateBeforeSave: false });
+      
+      return res.status(500).json({
+        success: false,
+        error: 'Failed to send verification email'
+      });
+    }
+  } catch (error) {
+    console.log(error);
+    user.clearResetPasswordFields();
+    await user.save({ validateBeforeSave: false });
+
+    return res.status(500).json({
+      success: false,
+      error: 'Email could not be sent'
+    });
+  }
+});
+
+// Verify Reset Code
+const verifyResetCode = asyncHandler(async (req, res) => {
+  const { email, code } = req.body;
+
+  const user = await User.findOne({ email }).select('+resetPasswordCode +resetPasswordExpire');
+
+  if (!user) {
+    return res.status(404).json({
+      success: false,
+      error: 'No user found with that email'
+    });
+  }
+
+  // Verify the code
+  const isValidCode = await user.verifyResetPasswordCode(code);
+
+  if (!isValidCode) {
+    return res.status(400).json({
+      success: false,
+      error: 'Invalid or expired verification code'
+    });
+  }
+
+  res.status(200).json({
+    success: true,
+    message: 'Verification code is valid',
+    canResetPassword: true
+  });
+});
+
+// Reset Password with Code
+const resetPasswordWithCode = asyncHandler(async (req, res) => {
+  const { email, code, password } = req.body;
+
+  if (!password) {
+    return res.status(400).json({
+      success: false,
+      error: 'Please provide a new password'
+    });
+  }
+
+  const user = await User.findOne({ email }).select('+resetPasswordCode +resetPasswordExpire');
+
+  if (!user) {
+    return res.status(404).json({
+      success: false,
+      error: 'No user found with that email'
+    });
+  }
+
+  // Verify the code again
+  const isValidCode = await user.verifyResetPasswordCode(code);
+
+  if (!isValidCode) {
+    return res.status(400).json({
+      success: false,
+      error: 'Invalid or expired verification code'
+    });
+  }
+
+  // Set new password and clear reset fields
+  user.password = password;
+  user.clearResetPasswordFields();
+  await user.save();
+
+  // Generate new JWT token
+  const jwtToken = generateToken(user);
+
+  res.status(200).json({
+    success: true,
+    message: 'Password reset successful',
+    token: jwtToken,
+    data: {
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role
+    }
+  });
+});
+
+
+
+
+
+// Admin Functions
+const getAllUsers = asyncHandler(async (req, res) => {
+  // Check if user is admin
+  if (!req.user.isAdmin()) {
+    return res.status(403).json({
+      success: false,
+      error: 'Access denied. Admin privileges required.'
+    });
+  }
+
+  const { includeDeleted = false, page = 1, limit = 10 } = req.query;
+  const skip = (page - 1) * limit;
+
+  let users;
+  let total;
+
+  if (includeDeleted === 'true') {
+    users = await User.findWithDeleted()
+      .select('-password -resetPasswordCode -resetPasswordExpire')
+      .skip(skip)
+      .limit(parseInt(limit))
+      .sort({ createdAt: -1 });
+    total = await User.countDocuments({});
+  } else {
+    users = await User.find()
+      .select('-password -resetPasswordCode -resetPasswordExpire')
+      .skip(skip)
+      .limit(parseInt(limit))
+      .sort({ createdAt: -1 });
+    total = await User.countDocuments({ isDeleted: 1 });
+  }
+
+  res.status(200).json({
+    success: true,
+    data: {
+      users,
+      pagination: {
+        currentPage: parseInt(page),
+        totalPages: Math.ceil(total / limit),
+        totalUsers: total,
+        hasNext: page * limit < total,
+        hasPrev: page > 1
+      }
+    }
+  });
+});
+
+const toggleUserStatus = asyncHandler(async (req, res) => {
+  // Check if user is admin
+  if (!req.user.isAdmin()) {
+    return res.status(403).json({
+      success: false,
+      error: 'Access denied. Admin privileges required.'
+    });
+  }
+
+  const { userId } = req.params;
+
+  const user = await User.findWithDeleted().findOne({ _id: userId });
+  if (!user) {
+    return res.status(404).json({
+      success: false,
+      error: 'User not found'
+    });
+  }
+
+  // Prevent admin from deactivating themselves
+  if (user._id.toString() === req.user._id.toString()) {
+    return res.status(400).json({
+      success: false,
+      error: 'You cannot deactivate your own account'
+    });
+  }
+
+  await user.toggleActiveStatus();
+
+  res.status(200).json({
+    success: true,
+    message: `User ${user.isActive ? 'activated' : 'deactivated'} successfully`,
+    data: {
+      userId: user._id,
+      isActive: user.isActive
+    }
+  });
+});
+
+const restoreUser = asyncHandler(async (req, res) => {
+  // Check if user is admin
+  if (!req.user.isAdmin()) {
+    return res.status(403).json({
+      success: false,
+      error: 'Access denied. Admin privileges required.'
+    });
+  }
+
+  const { userId } = req.params;
+
+  const user = await User.findWithDeleted().findOne({ _id: userId });
+  if (!user) {
+    return res.status(404).json({
+      success: false,
+      error: 'User not found'
+    });
+  }
+
+  if (user.isDeleted === 1) {
+    return res.status(400).json({
+      success: false,
+      error: 'User is not deleted'
+    });
+  }
+
+  await user.restore();
+
+  res.status(200).json({
+    success: true,
+    message: 'User restored successfully',
+    data: {
+      userId: user._id,
+      isDeleted: user.isDeleted
+    }
+  });
+});
+
+const permanentDeleteUser = asyncHandler(async (req, res) => {
+  // Check if user is admin
+  if (!req.user.isAdmin()) {
+    return res.status(403).json({
+      success: false,
+      error: 'Access denied. Admin privileges required.'
+    });
+  }
+
+  const { userId } = req.params;
+
+  // Prevent admin from deleting themselves
+  if (userId === req.user._id.toString()) {
+    return res.status(400).json({
+      success: false,
+      error: 'You cannot delete your own account'
+    });
+  }
+
+  const user = await User.findWithDeleted().findOne({ _id: userId });
+  if (!user) {
+    return res.status(404).json({
+      success: false,
+      error: 'User not found'
+    });
+  }
+
+  // Delete user's apps permanently
+  const App = require('../models/appSchema');
+  await App.deleteMany({ userId });
+
+  // Delete user permanently
+  await User.findByIdAndDelete(userId);
+
+  res.status(200).json({
+    success: true,
+    message: 'User permanently deleted'
+  });
+});
+
+module.exports = { 
+  register, 
+  login, 
+  getProfile, 
+  updateProfile, 
+  changePassword, 
+  deleteAccount, 
+  getDashboard, 
+  refreshToken,
+  sendResetCode,
+  verifyResetCode,
+  resetPasswordWithCode,
+  // Admin functions
+  getAllUsers,
+  toggleUserStatus,
+  restoreUser,
+  permanentDeleteUser
+};

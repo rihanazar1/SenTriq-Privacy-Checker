@@ -77,9 +77,56 @@ const changePasswordSchema = yup.object({
     )
 });
 
+// Send reset code validation schema
+const sendResetCodeSchema = yup.object({
+  email: yup
+    .string()
+    .required('Email is required')
+    .email('Please enter a valid email address')
+    .trim()
+});
+
+// Verify reset code validation schema
+const verifyResetCodeSchema = yup.object({
+  email: yup
+    .string()
+    .required('Email is required')
+    .email('Please enter a valid email address')
+    .trim(),
+  code: yup
+    .string()
+    .required('Verification code is required')
+    .matches(/^\d{6}$/, 'Verification code must be 6 digits')
+});
+
+// Reset password with code validation schema
+const resetPasswordWithCodeSchema = yup.object({
+  email: yup
+    .string()
+    .required('Email is required')
+    .email('Please enter a valid email address')
+    .trim(),
+  code: yup
+    .string()
+    .required('Verification code is required')
+    .matches(/^\d{6}$/, 'Verification code must be 6 digits'),
+  password: yup
+    .string()
+    .required('Password is required')
+    .min(6, 'Password must be at least 6 characters long')
+    .max(128, 'Password cannot exceed 128 characters')
+    .matches(
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
+      'Password must contain at least one uppercase letter, one lowercase letter, and one number'
+    )
+});
+
 module.exports = {
   registerValidationSchema,
   loginValidationSchema,
   updateValidationSchema,
   changePasswordSchema,
+  sendResetCodeSchema,
+  verifyResetCodeSchema,
+  resetPasswordWithCodeSchema,
 };
