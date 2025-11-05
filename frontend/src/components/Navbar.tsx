@@ -15,9 +15,12 @@ const Navbar: React.FC = () => {
 
   // Check authentication status
   const token = localStorage.getItem('token');
+
   const { data: profileData} = useGetProfileQuery(undefined, {
     skip: !token
   });
+
+  console.log(profileData)
 
   // Simple token-based authentication check
   const isAuthenticated = !!token;

@@ -32,6 +32,15 @@ const protect = asyncHandler(async (req, res, next) => {
       });
     }
 
+    // Check if user account is deactivated
+    if (req.user.isActive === false) {
+      return res.status(403).json({
+        success: false,
+        error: 'Account has been deactivated. Please contact support.',
+        accountDeactivated: true
+      });
+    }
+
     next();
   } catch (error) {
     return res.status(401).json({

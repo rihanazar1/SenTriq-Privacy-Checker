@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { toast } from 'react-hot-toast';
-import { 
-  useSendResetCodeMutation, 
-  useVerifyResetCodeMutation, 
-  useResetPasswordWithCodeMutation 
+import { toastService } from '../../utils/toast';
+import {
+  useSendResetCodeMutation,
+  useVerifyResetCodeMutation,
+  useResetPasswordWithCodeMutation
 } from '../../store/api/authApi';
 import { ArrowLeft, Mail, Shield, Key, Eye, EyeOff } from 'lucide-react';
 
@@ -24,72 +24,72 @@ const ForgotPassword = () => {
 
   const handleSendCode = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!email.trim()) {
-      toast.error('Please enter your email address');
+      toastService.error('Please enter your email address');
       return;
     }
 
     try {
       const result = await sendResetCode({ email: email.trim() }).unwrap();
-      toast.success(result.message);
+      toastService.success(result.message);
       setStep('code');
     } catch (error: any) {
-      toast.error(error?.data?.error || 'Failed to send verification code');
+      toastService.error(error?.data?.error || 'Failed to send verification code');
     }
   };
 
   const handleVerifyCode = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!code.trim() || code.length !== 6) {
-      toast.error('Please enter a valid 6-digit code');
+      toastService.error('Please enter a valid 6-digit code');
       return;
     }
 
     try {
       const result = await verifyResetCode({ email, code: code.trim() }).unwrap();
-      toast.success(result.message);
+      toastService.success(result.message);
       setStep('password');
     } catch (error: any) {
-      toast.error(error?.data?.error || 'Invalid verification code');
+      toastService.error(error?.data?.error || 'Invalid verification code');
     }
   };
 
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!password || password.length < 6) {
-      toast.error('Password must be at least 6 characters long');
+      toastService.error('Password must be at least 6 characters long');
       return;
     }
 
     if (password !== confirmPassword) {
-      toast.error('Passwords do not match');
+      toastService.error('Passwords do not match');
       return;
     }
 
     // Password strength validation
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/;
     if (!passwordRegex.test(password)) {
-      toast.error('Password must contain at least one uppercase letter, one lowercase letter, and one number');
+      toastService.error('Password must contain at least one uppercase letter, one lowercase letter, and one number');
       return;
     }
 
     try {
-      const result = await resetPasswordWithCode({ 
-        email, 
-        code, 
-        password 
+      const result = await resetPasswordWithCode({
+        email,
+        code,
+        password
       }).unwrap();
-      
+
       // Store the token
       localStorage.setItem('token', result.token);
-      
-      toast.success(result.message);
+
+      toastService.success(result.message);
       navigate('/dashboard');
     } catch (error: any) {
-      toast.error(error?.data?.error || 'Failed to reset password');
+      toastService.error(error?.data?.error || 'Failed to reset password');
     }
   };
 
@@ -275,7 +275,7 @@ const ForgotPassword = () => {
         {/* Back Button */}
         <Link
           to="/login"
-          className="inline-flex items-center text-[#A3E635] hover:text-[#8BC34A] transition-colors mb-8"
+          className=" cursor-pointer inline-flex items-center text-[#A3E635] hover:text-[#8BC34A] transition-colors mb-8"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back to Login

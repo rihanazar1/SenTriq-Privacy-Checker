@@ -1,4 +1,6 @@
-import React from 'react'
+import React, { useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useGetProfileQuery } from '../../store/api/authApi'
 import Particles from '../../components/Particles'
 import ScrollVelocity from '../../components/ScrollVelocity'
 import images from '../../assets'
@@ -7,6 +9,20 @@ import Navbar from '../../components/Navbar'
 import TextType from '../../components/TextType'
 
 const Home: React.FC = () => {
+  const navigate = useNavigate();
+  const token = localStorage.getItem('token');
+  
+  // Only fetch profile if user is logged in
+  const { data: profileData } = useGetProfileQuery(undefined, {
+    skip: !token
+  });
+
+  useEffect(() => {
+    // If user is logged in and deactivated, redirect to deactivated page
+    if (token && profileData?.data && profileData.data.isActive === false) {
+      navigate('/account-deactivated', { replace: true });
+    }
+  }, [token, profileData, navigate]);
 
   // const cards = [
   //   {

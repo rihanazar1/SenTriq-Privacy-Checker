@@ -10,6 +10,8 @@ import FakeDataGenerator from "../pages/fakeDataGenerator/FakeDataGenerator";
 import AppTrackerPage from "../pages/appsTracker/AppTrackerPage";
 import Profile from "../pages/profile/Profile";
 import AdminPanel from "../pages/admin/AdminPanel";
+import AccountDeactivated from "../pages/auth/AccountDeactivated";
+import UserStatusChecker from "../components/UserStatusChecker";
 
 function isTokenExpired(token: string): boolean {
   try {
@@ -31,7 +33,13 @@ const isAuthenticated = () => {
 };
 
 export const ProtectedRoute = () => {
-  return isAuthenticated() ? <Outlet /> : <Navigate to="/login" replace />;
+  return isAuthenticated() ? (
+    <UserStatusChecker>
+      <Outlet />
+    </UserStatusChecker>
+  ) : (
+    <Navigate to="/login" replace />
+  );
 };
 
 
@@ -51,6 +59,10 @@ export const Router = createBrowserRouter([
   {
     path: "/forgot-password",
     element: <ForgotPassword />
+  },
+  {
+    path: "/account-deactivated",
+    element: <AccountDeactivated />
   },
   {
     element: <ProtectedRoute />, // yahan Outlet render hoga agar user authenticated hai

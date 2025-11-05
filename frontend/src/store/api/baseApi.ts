@@ -27,33 +27,43 @@ export const baseQueryWithReauth: BaseQueryFn<
 > = async (args, api, extraOptions) => {
   const result = await baseQuery(args, api, extraOptions);
 
-  // Only remove token if it's actually an authentication error, not validation errors
-  if (result.error && result.error.status === 401) {
+  // Handle authentication and account status errors
+  if (result.error) {
     const errorData = result.error.data as any;
     
-    // Don't remove token for these specific validation errors
-    const validationErrors = [
-      'Invalid master password',
-      'master password',
-      'Master password',
-      'Invalid password'
-    ];
-    
-    const isValidationError = validationErrors.some(errorText => 
-      errorData?.error?.includes(errorText) || 
-      errorData?.message?.includes(errorText)
-    );
-    
-    if (isValidationError) {
-      // Don't remove token for validation errors
+    // Check for deactivated account
+    if (result.error.status === 403 && errorData?.accountDeactivated) {
+      // Redirect to deactivated account page
+      window.location.href = '/account-deactivated';
       return result;
     }
     
-    // Only remove token for actual authentication failures (expired/invalid token)
-    localStorage.removeItem("token");
-    (
-      result.error as FetchBaseQueryError & { isAuthExpired?: boolean }
-    ).isAuthExpired = true;
+    // Handle 401 authentication errors
+    if (result.error.status === 401) {
+      // Don't remove token for these specific validation errors
+      const validationErrors = [
+        'Invalid master password',
+        'master password',
+        'Master password',
+        'Invalid password'
+      ];
+      
+      const isValidationError = validationErrors.some(errorText => 
+        errorData?.error?.includes(errorText) || 
+        errorData?.message?.includes(errorText)
+      );
+      
+      if (isValidationError) {
+        // Don't remove token for validation errors
+        return result;
+      }
+      
+      // Only remove token for actual authentication failures (expired/invalid token)
+      localStorage.removeItem("token");
+      (
+        result.error as FetchBaseQueryError & { isAuthExpired?: boolean }
+      ).isAuthExpired = true;
+    }
   }
 
   return result;

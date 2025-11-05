@@ -77,6 +77,7 @@ const login = asyncHandler(async (req, res) => {
       id: user._id,
       name: user.name,
       email: user.email,
+      isActive: user.isActive,
       role: user.role
     }
   });
@@ -97,6 +98,7 @@ const getProfile = asyncHandler(async (req, res) => {
         name: req.user.name,
         email: req.user.email,
         role: req.user.role,
+        isActive: req.user.isActive,
         createdAt: req.user.createdAt,
         updatedAt: req.user.updatedAt
       }
@@ -268,10 +270,10 @@ const sendResetCode = asyncHandler(async (req, res) => {
 
   // Send email with verification code
   const { sendVerificationCode } = require('../config/nodemailer');
-  
+
   try {
     const emailResult = await sendVerificationCode(user.email, resetCode, user.name);
-    
+
     if (emailResult.success) {
       res.status(200).json({
         success: true,
@@ -283,7 +285,7 @@ const sendResetCode = asyncHandler(async (req, res) => {
       // Clear the reset code if email failed
       user.clearResetPasswordFields();
       await user.save({ validateBeforeSave: false });
-      
+
       return res.status(500).json({
         success: false,
         error: 'Failed to send verification email'
@@ -403,12 +405,12 @@ const getAllUsers = asyncHandler(async (req, res) => {
   let total;
 
   if (includeDeleted === 'true') {
-    users = await User.findWithDeleted()
+    users = await User.find({ isDeleted: { $in: [0, 1] } })
       .select('-password -resetPasswordCode -resetPasswordExpire')
       .skip(skip)
       .limit(parseInt(limit))
       .sort({ createdAt: -1 });
-    total = await User.countDocuments({});
+    total = await User.countDocuments({ isDeleted: { $in: [0, 1] } });
   } else {
     users = await User.find()
       .select('-password -resetPasswordCode -resetPasswordExpire')
@@ -444,7 +446,7 @@ const toggleUserStatus = asyncHandler(async (req, res) => {
 
   const { userId } = req.params;
 
-  const user = await User.findWithDeleted().findOne({ _id: userId });
+  const user = await User.findOne({ _id: userId, isDeleted: { $in: [0, 1] } });
   if (!user) {
     return res.status(404).json({
       success: false,
@@ -483,7 +485,7 @@ const restoreUser = asyncHandler(async (req, res) => {
 
   const { userId } = req.params;
 
-  const user = await User.findWithDeleted().findOne({ _id: userId });
+  const user = await User.findOne({ _id: userId, isDeleted: { $in: [0, 1] } });
   if (!user) {
     return res.status(404).json({
       success: false,
@@ -529,7 +531,7 @@ const permanentDeleteUser = asyncHandler(async (req, res) => {
     });
   }
 
-  const user = await User.findWithDeleted().findOne({ _id: userId });
+  const user = await User.findOne({ _id: userId, isDeleted: { $in: [0, 1] } });
   if (!user) {
     return res.status(404).json({
       success: false,
@@ -550,14 +552,14 @@ const permanentDeleteUser = asyncHandler(async (req, res) => {
   });
 });
 
-module.exports = { 
-  register, 
-  login, 
-  getProfile, 
-  updateProfile, 
-  changePassword, 
-  deleteAccount, 
-  getDashboard, 
+module.exports = {
+  register,
+  login,
+  getProfile,
+  updateProfile,
+  changePassword,
+  deleteAccount,
+  getDashboard,
   refreshToken,
   sendResetCode,
   verifyResetCode,

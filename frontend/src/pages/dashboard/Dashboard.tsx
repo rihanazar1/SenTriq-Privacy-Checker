@@ -53,7 +53,7 @@ const Dashboard = () => {
 
       <div className="p-6">
         <div className="max-w-6xl mx-auto">
-          <Navbar />     
+          <Navbar />
           <div className="absolute inset-0 z-0">
             <Particles
               particleCount={250}
@@ -71,7 +71,7 @@ const Dashboard = () => {
               <div className="flex items-center justify-between w-full">
                 <img src={images.img10} alt="Observer" className="w-32 h-32 rounded-lg" />
                 <div>
-                  <h1 className="text-2xl font-bold text-white mb-1">👋 Welcome back, {profileData?.user?.name || 'User'}!</h1>
+                  <h1 className="text-2xl font-bold text-white mb-1">👋 Welcome back, {profileData?.data?.name || 'User'}!</h1>
                   <p className="text-blue-200">Stay on top of your data privacy in real time.</p>
                 </div>
               </div>
@@ -212,12 +212,12 @@ const Dashboard = () => {
                   pointer={{ type: "blob", animationDelay: 0 }}
                   value={averageRiskScore}
                 />
-                  <div className="text-sm text-white">Risk Score</div>
+                <div className="text-sm text-white">Risk Score</div>
               </div>
             </div>
           </div>
 
-                  
+
           {/* Privacy Tips */}
           <div
             className="rounded-2xl p-8 mb-8 border backdrop-blur-xl shadow-xl"
@@ -309,8 +309,9 @@ const Dashboard = () => {
 
         </div>
       </div>
-      
+
       <Footer />
+
     </div>
   );
 };

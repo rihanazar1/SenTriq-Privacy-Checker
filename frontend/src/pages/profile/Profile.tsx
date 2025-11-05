@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useGetProfileQuery, useUpdateProfileMutation, useChangePasswordMutation, useDeleteAccountMutation } from '../../store/api/authApi';
-import { toast } from 'react-hot-toast';
+import { toastService } from '../../utils/toast';
 
 interface ProfileData {
   id: string;
@@ -56,9 +56,9 @@ const Profile: React.FC = () => {
 
   const handleProfileUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!profileData.name.trim() || !profileData.email.trim()) {
-      toast.error('Name and email are required');
+      toastService.error('Name and email are required');
       return;
     }
 
@@ -69,12 +69,13 @@ const Profile: React.FC = () => {
       }).unwrap();
 
       if (result.success) {
-        toast.success('Profile updated successfully');
+        toastService.success('Profile updated successfully');
         setIsEditing(false);
         refetch();
       }
-    } catch (error: any) {
-      toast.error(error?.data?.error || 'Failed to update profile');
+    } catch (error: unknown) {
+      const apiError = error as { data?: { error?: string } };
+      toastService.error(apiError?.data?.error || 'Failed to update profile');
     }
   };
 
@@ -82,12 +83,12 @@ const Profile: React.FC = () => {
     e.preventDefault();
 
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      toast.error('New passwords do not match');
+      toastService.error('New passwords do not match');
       return;
     }
 
     if (passwordData.newPassword.length < 6) {
-      toast.error('Password must be at least 6 characters long');
+      toastService.error('Password must be at least 6 characters long');
       return;
     }
 
@@ -98,7 +99,7 @@ const Profile: React.FC = () => {
       }).unwrap();
 
       if (result.success) {
-        toast.success('Password changed successfully');
+        toastService.success('Password changed successfully');
         setShowPasswordForm(false);
         setPasswordData({
           currentPassword: '',
@@ -106,22 +107,24 @@ const Profile: React.FC = () => {
           confirmPassword: ''
         });
       }
-    } catch (error: any) {
-      toast.error(error?.data?.error || 'Failed to change password');
+    } catch (error: unknown) {
+      const apiError = error as { data?: { error?: string } };
+      toastService.error(apiError?.data?.error || 'Failed to change password');
     }
   };
 
   const handleDeleteAccount = async () => {
     try {
       const result = await deleteAccount().unwrap();
-      
+
       if (result.success) {
-        toast.success('Account deleted successfully');
+        toastService.success('Account deleted successfully');
         localStorage.removeItem('token');
         navigate('/auth/login');
       }
-    } catch (error: any) {
-      toast.error(error?.data?.error || 'Failed to delete account');
+    } catch (error: unknown) {
+      const apiError = error as { data?: { error?: string } };
+      toastService.error(apiError?.data?.error || 'Failed to delete account');
     }
   };
 
@@ -141,7 +144,7 @@ const Profile: React.FC = () => {
           <p className="text-gray-400 mb-4">Please try again later</p>
           <button
             onClick={() => navigate('/dashboard')}
-            className="px-4 py-2 bg-[#A3E635] text-black rounded-lg hover:bg-[#8BC34A] transition-colors"
+            className="px-4 cursor-pointer py-2 bg-[#A3E635] text-black rounded-lg hover:bg-[#8BC34A] transition-colors"
           >
             Back to Dashboard
           </button>
@@ -157,7 +160,7 @@ const Profile: React.FC = () => {
         <div className="mb-8">
           <button
             onClick={() => navigate('/dashboard')}
-            className="flex items-center text-[#A3E635] hover:text-[#8BC34A] transition-colors mb-4"
+            className="flex cursor-pointer items-center text-[#A3E635] hover:text-[#8BC34A] transition-colors mb-4"
           >
             <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -259,11 +262,10 @@ const Profile: React.FC = () => {
                       <label className="block text-sm font-medium text-gray-300 mb-1">
                         Role
                       </label>
-                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                        profileData.role === 'admin' 
-                          ? 'bg-red-100 text-red-800' 
-                          : 'bg-green-100 text-green-800'
-                      }`}>
+                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${profileData.role === 'admin'
+                        ? 'bg-red-100 text-red-800'
+                        : 'bg-green-100 text-green-800'
+                        }`}>
                         {profileData.role.charAt(0).toUpperCase() + profileData.role.slice(1)}
                       </span>
                     </div>
@@ -395,7 +397,7 @@ const Profile: React.FC = () => {
               <p className="text-gray-300 text-sm mb-4">
                 Once you delete your account, there is no going back. Please be certain.
               </p>
-              
+
               {!showDeleteConfirm ? (
                 <button
                   onClick={() => setShowDeleteConfirm(true)}

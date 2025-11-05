@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../hooks/useAuth';
-import type { LoginRequest } from '../../store/api/authApi';
+import { useLoginMutation, type LoginRequest } from '../../store/api/authApi';
+import { toastService } from '../../utils/toast';
 
 const Login = () => {
   const navigate = useNavigate();
-  const { login, isLoginLoading, error, clearAuthError } = useAuth();
+  const [loginMutation, { isLoading: isLoginLoading }] = useLoginMutation();
   
   const [formData, setFormData] = useState<LoginRequest>({
     email: '',
@@ -18,17 +18,22 @@ const Login = () => {
     e.preventDefault();
     
     try {
-      await login(formData);
-      navigate('/dashboard');
-    } catch (error) {
-      console.error('Login failed:', error);
+      const result = await loginMutation(formData).unwrap();
+      if (result.success) {
+        // Store token in localStorage
+        localStorage.setItem('token', result.token);
+        toastService.success('Login successful!');
+        navigate('/');
+      }
+    } catch (error: unknown) {
+      const apiError = error as { data?: { error?: string } };
+      toastService.error(apiError?.data?.error || 'Login failed');
     }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
-    if (error) clearAuthError();
   };
 
   return (
@@ -92,12 +97,7 @@ const Login = () => {
             <p className="text-gray-400">Access your secure account</p>
           </div>
 
-          {error && (
-            <div className="bg-red-900/20 border border-red-500/50 text-red-400 p-4 rounded-lg mb-6 flex justify-between items-center">
-              <span>{error}</span>
-              <button onClick={clearAuthError} className="text-red-400 hover:text-red-300 text-xl">×</button>
-            </div>
-          )}
+
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>

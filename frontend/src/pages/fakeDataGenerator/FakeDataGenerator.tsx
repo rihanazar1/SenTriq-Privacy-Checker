@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useGetSampleDataQuery, useGenerateFakeDataMutation } from '../../store/api/fakeDataApi'
-import { toast } from 'react-hot-toast'
+import { toastService } from '../../utils/toast'
 import Footer from "../../components/Footer"
 import Navbar from "../../components/Navbar"
 import Particles from "../../components/Particles"
@@ -88,7 +88,7 @@ const FakeDataGenerator = () => {
     const selectedFieldNames = Object.keys(selectedFields).filter(field => selectedFields[field])
 
     if (selectedFieldNames.length === 0) {
-      toast.error('Please select at least one field')
+      toastService.error('Please select at least one field')
       return
     }
 
@@ -101,9 +101,9 @@ const FakeDataGenerator = () => {
       }).unwrap()
 
       setGeneratedData(result.data)
-      toast.success(`Generated ${result.count} records successfully`)
+      toastService.success(`Generated ${result.count} records successfully`)
     } catch (error) {
-      toast.error('Failed to generate fake data')
+      toastService.error('Failed to generate fake data')
       console.error('Generation error:', error)
     } finally {
       setIsGenerating(false)
@@ -131,7 +131,7 @@ const FakeDataGenerator = () => {
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(JSON.stringify(generatedData, null, 2))
-    toast.success('Data copied to clipboard')
+    toastService.success('Data copied to clipboard')
   }
 
   const downloadAsJson = () => {

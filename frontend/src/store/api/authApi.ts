@@ -7,6 +7,9 @@ export interface User {
   role?: string;
   createdAt?: string;
   updatedAt?: string;
+  isActive?: boolean;
+  isDeleted?: number; // 1 = active, 0 = deleted
+  deletedAt?: string | null;
 }
 
 export interface LoginRequest {

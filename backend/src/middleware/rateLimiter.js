@@ -24,7 +24,7 @@ const createAppRiskLimiter = () => {
 const createAuthLimiter = () => {
   return rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 5, // Limit each IP to 5 requests per windowMs for auth
+    max: 10, // Limit each IP to 5 requests per windowMs for auth
     message: {
       success: false,
       error: 'Too many authentication attempts. Please try again later.',

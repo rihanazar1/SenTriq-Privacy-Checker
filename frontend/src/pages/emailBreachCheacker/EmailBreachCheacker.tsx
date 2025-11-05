@@ -4,7 +4,7 @@ import Navbar from "../../components/Navbar"
 import Particles from "../../components/Particles"
 import { useScanEmailBreachMutation } from '../../store/api/emailBreachApi'
 import type { EmailBreachScanResponse, BreachRecord } from '../../store/api/emailBreachApi'
-import { toast } from 'react-hot-toast'
+import { toastService } from '../../utils/toast'
 import {
   Search,
   Shield,
@@ -28,7 +28,7 @@ const EmailBreachCheacker = () => {
     e.preventDefault()
 
     if (!email.trim()) {
-      toast.error('Please enter an email address')
+      toastService.error('Please enter an email address')
       return
     }
 
@@ -37,12 +37,12 @@ const EmailBreachCheacker = () => {
       setScanResult(result)
 
       if (result.data.breachCount > 0) {
-        toast.success(`Scan complete! Found ${result.data.breachCount} breach(es)`)
+        toastService.success(`Scan complete! Found ${result.data.breachCount} breach(es)`)
       } else {
-        toast.success('Good news! No breaches found for this email')
+        toastService.success('Good news! No breaches found for this email')
       }
     } catch (error) {
-      toast.error('Failed to scan email. Please try again.')
+      toastService.error('Failed to scan email. Please try again.')
       console.error('Email breach scan error:', error)
     }
   }

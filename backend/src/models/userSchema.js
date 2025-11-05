@@ -63,6 +63,14 @@ const userSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
+    toJSON: {
+      transform: function(doc, ret) {
+        ret.id = ret._id;
+        delete ret._id;
+        delete ret.__v;
+        return ret;
+      }
+    }
   }
 );
 
@@ -160,8 +168,8 @@ userSchema.statics.findDeleted = function () {
 };
 
 // Static method to find all users including deleted (admin only)
-userSchema.statics.findWithDeleted = function () {
-  return this.find({});
+userSchema.statics.findWithDeleted = function (filter = {}) {
+  return this.find({ ...filter, isDeleted: { $in: [0, 1] } });
 };
 
 // Static method to get user dashboard statistics

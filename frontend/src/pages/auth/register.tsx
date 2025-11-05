@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../hooks/useAuth';
-import type { RegisterRequest } from '../../store/api/authApi';
+import { useRegisterMutation, type RegisterRequest } from '../../store/api/authApi';
+import { toastService } from '../../utils/toast';
 
 const Register = () => {
   const navigate = useNavigate();
-  const { register, isRegisterLoading, error, clearAuthError } = useAuth();
+  const [registerMutation, { isLoading: isRegisterLoading }] = useRegisterMutation();
 
   const [formData, setFormData] = useState<RegisterRequest>({
     name: '',
@@ -21,22 +21,27 @@ const Register = () => {
     e.preventDefault();
 
     if (formData.password !== formData.confirmPassword) {
-      alert('Passwords do not match');
+      toastService.error('Passwords do not match');
       return;
     }
 
     try {
-      await register(formData);
-      navigate('/dashboard');
-    } catch (error) {
-      console.error('Registration failed:', error);
+      const result = await registerMutation(formData).unwrap();
+      if (result.success) {
+        // Store token in localStorage
+        localStorage.setItem('token', result.token);
+        toastService.success('Registration successful!');
+        navigate('/dashboard');
+      }
+    } catch (error: unknown) {
+      const apiError = error as { data?: { error?: string } };
+      toastService.error(apiError?.data?.error || 'Registration failed');
     }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
-    if (error) clearAuthError();
   };
 
   return (
@@ -100,12 +105,7 @@ const Register = () => {
             <p className="text-gray-400">Join us today and experience secure, private communication</p>
           </div>
 
-          {error && (
-            <div className="bg-red-900/20 border border-red-500/50 text-red-400 p-4 rounded-lg mb-6 flex justify-between items-center">
-              <span>{error}</span>
-              <button onClick={clearAuthError} className="text-red-400 hover:text-red-300 text-xl">×</button>
-            </div>
-          )}
+
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>

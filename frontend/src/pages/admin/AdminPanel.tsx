@@ -1,26 +1,37 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  useGetAllUsersQuery, 
-  useToggleUserStatusMutation, 
-  useRestoreUserMutation, 
+import {
+  useGetAllUsersQuery,
+  useToggleUserStatusMutation,
+  useRestoreUserMutation,
   usePermanentDeleteUserMutation,
-  useGetProfileQuery 
+  useGetProfileQuery,
+  type User
 } from '../../store/api/authApi';
-import { toast } from 'react-hot-toast';
+import { toastService } from '../../utils/toast';
+
+
+
+interface ApiError {
+  data?: {
+    error?: string;
+  };
+  message?: string;
+}
 
 const AdminPanel: React.FC = () => {
   const navigate = useNavigate();
   const [page, setPage] = useState(1);
   const [includeDeleted, setIncludeDeleted] = useState(false);
-  
+
   const { data: profileData } = useGetProfileQuery();
-  const { data: usersData, isLoading, refetch } = useGetAllUsersQuery({ 
-    page, 
-    limit: 10, 
-    includeDeleted 
+
+  const { data: usersData, isLoading, refetch } = useGetAllUsersQuery({
+    page,
+    limit: 10,
+    includeDeleted
   });
-  
+
   const [toggleUserStatus] = useToggleUserStatusMutation();
   const [restoreUser] = useRestoreUserMutation();
   const [permanentDeleteUser] = usePermanentDeleteUserMutation();
@@ -36,7 +47,7 @@ const AdminPanel: React.FC = () => {
           <p className="text-gray-400 mb-4">You don't have admin privileges</p>
           <button
             onClick={() => navigate('/dashboard')}
-            className="px-4 py-2 bg-[#A3E635] text-black rounded-lg hover:bg-[#8BC34A] transition-colors"
+            className="px-4 py-2 cursor-pointer bg-[#A3E635] text-black rounded-lg hover:bg-[#8BC34A] transition-colors"
           >
             Back to Dashboard
           </button>
@@ -49,11 +60,12 @@ const AdminPanel: React.FC = () => {
     try {
       const result = await toggleUserStatus(userId).unwrap();
       if (result.success) {
-        toast.success(result.message);
+        toastService.success(result.message);
         refetch();
       }
-    } catch (error: any) {
-      toast.error(error?.data?.error || 'Failed to toggle user status');
+    } catch (error: unknown) {
+      const apiError = error as ApiError;
+      toastService.error(apiError?.data?.error || 'Failed to toggle user status');
     }
   };
 
@@ -61,11 +73,12 @@ const AdminPanel: React.FC = () => {
     try {
       const result = await restoreUser(userId).unwrap();
       if (result.success) {
-        toast.success(result.message);
+        toastService.success(result.message);
         refetch();
       }
-    } catch (error: any) {
-      toast.error(error?.data?.error || 'Failed to restore user');
+    } catch (error: unknown) {
+      const apiError = error as ApiError;
+      toastService.error(apiError?.data?.error || 'Failed to restore user');
     }
   };
 
@@ -74,11 +87,12 @@ const AdminPanel: React.FC = () => {
       try {
         const result = await permanentDeleteUser(userId).unwrap();
         if (result.success) {
-          toast.success(result.message);
+          toastService.success(result.message);
           refetch();
         }
-      } catch (error: any) {
-        toast.error(error?.data?.error || 'Failed to delete user');
+      } catch (error: unknown) {
+        const apiError = error as ApiError;
+        toastService.error(apiError?.data?.error || 'Failed to delete user');
       }
     }
   };
@@ -98,7 +112,7 @@ const AdminPanel: React.FC = () => {
         <div className="mb-8">
           <button
             onClick={() => navigate('/dashboard')}
-            className="flex items-center text-[#A3E635] hover:text-[#8BC34A] transition-colors mb-4"
+            className="flex cursor-pointer items-center text-[#A3E635] hover:text-[#8BC34A] transition-colors mb-4"
           >
             <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -160,7 +174,7 @@ const AdminPanel: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-700">
-                {usersData?.data?.users?.map((user) => (
+                {usersData?.data?.users?.map((user: User) => (
                   <tr key={user.id} className="hover:bg-gray-700/50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div>
@@ -169,29 +183,26 @@ const AdminPanel: React.FC = () => {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                        user.role === 'admin' 
-                          ? 'bg-red-100 text-red-800' 
-                          : 'bg-green-100 text-green-800'
-                      }`}>
+                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${user.role === 'admin'
+                        ? 'bg-red-100 text-red-800'
+                        : 'bg-green-100 text-green-800'
+                        }`}>
                         {user.role || 'user'}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex flex-col space-y-1">
-                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                          (user as any).isActive !== false
-                            ? 'bg-green-100 text-green-800' 
-                            : 'bg-red-100 text-red-800'
-                        }`}>
-                          {(user as any).isActive !== false ? 'Active' : 'Inactive'}
+                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${user.isActive
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-red-100 text-red-800'
+                          }`}>
+                          {user.isActive ? 'Active' : 'Inactive'}
                         </span>
-                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                          (user as any).isDeleted !== 0
-                            ? 'bg-blue-100 text-blue-800' 
-                            : 'bg-yellow-100 text-yellow-800'
-                        }`}>
-                          {(user as any).isDeleted !== 0 ? 'Not Deleted' : 'Deleted'}
+                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${user.isDeleted !== 0
+                          ? 'bg-blue-100 text-blue-800'
+                          : 'bg-yellow-100 text-yellow-800'
+                          }`}>
+                          {user.isDeleted !== 0 ? 'Not Deleted' : 'Deleted'}
                         </span>
                       </div>
                     </td>
@@ -203,27 +214,26 @@ const AdminPanel: React.FC = () => {
                         <>
                           <button
                             onClick={() => handleToggleStatus(user.id)}
-                            className={`px-3 py-1 rounded text-xs font-medium ${
-                              (user as any).isActive !== false
-                                ? 'bg-red-600 text-white hover:bg-red-700'
-                                : 'bg-green-600 text-white hover:bg-green-700'
-                            }`}
+                            className={`px-3 py-1 cursor-pointer rounded text-xs font-medium ${user.isActive
+                              ? 'bg-red-600 text-white hover:bg-red-700'
+                              : 'bg-green-600 text-white hover:bg-green-700'
+                              }`}
                           >
-                            {(user as any).isActive !== false ? 'Deactivate' : 'Activate'}
+                            {user.isActive ? 'Deactivate' : 'Activate'}
                           </button>
-                          
-                          {(user as any).isDeleted === 0 && (
+
+                          {user.isDeleted === 0 && (
                             <button
                               onClick={() => handleRestoreUser(user.id)}
-                              className="px-3 py-1 bg-blue-600 text-white rounded text-xs font-medium hover:bg-blue-700"
+                              className="px-3 cursor-pointer py-1 bg-blue-600 text-white rounded text-xs font-medium hover:bg-blue-700"
                             >
                               Restore
                             </button>
                           )}
-                          
+
                           <button
                             onClick={() => handlePermanentDelete(user.id)}
-                            className="px-3 py-1 bg-red-800 text-white rounded text-xs font-medium hover:bg-red-900"
+                            className="px-3 cursor-pointer py-1 bg-red-800 text-white rounded text-xs font-medium hover:bg-red-900"
                           >
                             Delete Forever
                           </button>

@@ -7,7 +7,7 @@ import AppTrackerList from './AppTrackerList'
 import { useGetUserAppsQuery, useDeleteAppMutation, useUpdateAppMutation, useCheckAppRiskMutation} from '../../store/api/appsApi'
 import type { App } from '../../store/api/appsApi'
 import type { UpdateAppRequest } from '../../store/api/appsApi'
-import { toast } from 'react-hot-toast'
+import { toastService } from '../../utils/toast'
 
 const AppTrackerPage = () => {
   const [isFormOpen, setIsFormOpen] = useState(false)
@@ -41,10 +41,10 @@ const AppTrackerPage = () => {
     if (window.confirm(`Are you sure you want to delete "${appName}"?`)) {
       try {
         await deleteApp(appId).unwrap()
-        toast.success('App deleted successfully')
+        toastService.success('App deleted successfully')
         refetch()
       } catch (error) {
-        toast.error('Failed to delete app')
+        toastService.error('Failed to delete app')
         console.error('Delete error:', error)
       }
     }
@@ -54,12 +54,12 @@ const AppTrackerPage = () => {
     console.log(updateData)
     try {
       await updateApp({ id: appId, ...updateData }).unwrap()
-      toast.success('App updated successfully')
+      toastService.success('App updated successfully')
       setIsFormOpen(false)
       setEditingApp(null)
       refetch()
     } catch (error) {
-      toast.error('Failed to update app')
+      toastService.error('Failed to update app')
       console.error('Update error:', error)
     }
   }
@@ -72,12 +72,12 @@ const AppTrackerPage = () => {
       } else {
         // Add new app
         const result = await checkAppRisk({ ...formData, save: true }).unwrap()
-        toast.success('App added successfully')
+        toastService.success('App added successfully')
         setIsFormOpen(false)
         refetch()
       }
     } catch (error) {
-      toast.error(editingApp ? 'Failed to update app' : 'Failed to add app')
+      toastService.error(editingApp ? 'Failed to update app' : 'Failed to add app')
       console.error('Form submit error:', error)
     }
   }
