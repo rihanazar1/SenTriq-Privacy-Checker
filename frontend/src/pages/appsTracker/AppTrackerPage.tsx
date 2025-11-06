@@ -71,7 +71,7 @@ const AppTrackerPage = () => {
         await handleUpdateApp(editingApp._id, formData)
       } else {
         // Add new app
-        const result = await checkAppRisk({ ...formData, save: true }).unwrap()
+        await checkAppRisk({ ...formData, save: true }).unwrap()
         toastService.success('App added successfully')
         setIsFormOpen(false)
         refetch()

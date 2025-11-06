@@ -196,7 +196,7 @@ export const appsApi = baseApi.injectEndpoints({
     // Get single app by ID
     getApp: builder.query<GetAppResponse, string>({
       query: (id) => `/apps/${id}`,
-      providesTags: (result, error, id) => [{ type: "App", id }],
+      providesTags: (_result, _error, id) => [{ type: "App", id }],
     }),
 
     // Update app
@@ -206,7 +206,7 @@ export const appsApi = baseApi.injectEndpoints({
         method: "PUT",
         body: updateData,
       }),
-      invalidatesTags: (result, error, { id }) => [
+      invalidatesTags: (_result, _error, { id }) => [
         { type: "App", id },
         "App",
         "Dashboard",
@@ -219,7 +219,7 @@ export const appsApi = baseApi.injectEndpoints({
         url: `/apps/${id}`,
         method: "DELETE",
       }),
-      invalidatesTags: (result, error, id) => [
+      invalidatesTags: (_result, _error, id) => [
         { type: "App", id },
         "App",
         "Dashboard",
