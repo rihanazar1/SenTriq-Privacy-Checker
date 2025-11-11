@@ -2,8 +2,8 @@
   # Directory to change to before starting a build
   base = "frontend"
   
-  # Build command
-  command = "npm run build"
+  # Build command with legacy peer deps to handle React 19 compatibility
+  command = "npm install --legacy-peer-deps && npm run build"
   
   # Directory that contains the deploy-ready HTML files and assets
   publish = "dist"
@@ -14,6 +14,7 @@
   to = "/index.html"
   status = 200
 
-# Optional: Set Node version
+# Set Node version and npm config
 [build.environment]
   NODE_VERSION = "20"
+  NPM_FLAGS = "--legacy-peer-deps"
