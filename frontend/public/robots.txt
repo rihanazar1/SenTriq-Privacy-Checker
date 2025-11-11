@@ -1,0 +1,21 @@
+# Allow all crawlers
+User-agent: *
+Allow: /
+
+# Disallow admin and private pages
+Disallow: /admin
+Disallow: /dashboard
+Disallow: /profile
+Disallow: /login
+Disallow: /register
+Disallow: /data-vault
+Disallow: /apps-tracker
+Disallow: /fake-data-generator
+Disallow: /email-checker
+
+# Allow blog pages
+Allow: /blog
+Allow: /blog/*
+
+# Sitemap location
+Sitemap: https://sentriq.com/sitemap.xml

@@ -12,6 +12,10 @@ import Profile from "../pages/profile/Profile";
 import AdminPanel from "../pages/admin/AdminPanel";
 import AccountDeactivated from "../pages/auth/AccountDeactivated";
 import UserStatusChecker from "../components/UserStatusChecker";
+import BlogList from "../pages/blogs/BlogList";
+import BlogDetail from "../pages/blogs/BlogDetail";
+import CreateBlog from "../pages/blogs/CreateBlog";
+
 
 function isTokenExpired(token: string): boolean {
   try {
@@ -65,6 +69,14 @@ export const Router = createBrowserRouter([
     element: <AccountDeactivated />
   },
   {
+    path: "/blog",
+    element: <BlogList />
+  },
+  {
+    path: "/blog/:slug",
+    element: <BlogDetail />
+  },
+  {
     element: <ProtectedRoute />, // yahan Outlet render hoga agar user authenticated hai
     children: [
       { path: "/dashboard", element: <Dashboard /> },
@@ -74,6 +86,8 @@ export const Router = createBrowserRouter([
       { path: "/apps-tracker", element: <AppTrackerPage /> },
       { path: "/profile", element: <Profile /> },
       { path: "/admin", element: <AdminPanel /> },
+      { path: "/blog/create", element: <CreateBlog /> },
+      { path: "/blog/edit/:slug", element: <CreateBlog /> },
     ],
   },
 ])

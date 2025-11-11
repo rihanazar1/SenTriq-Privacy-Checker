@@ -5,6 +5,8 @@ import { useGetProfileQuery } from '../store/api/authApi';
 import { ChevronDown, User, LogOut } from 'lucide-react';
 
 const Navbar: React.FC = () => {
+
+
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isFeaturesOpen, setIsFeaturesOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -90,6 +92,13 @@ const Navbar: React.FC = () => {
           Home
         </button>
 
+        <button
+          onClick={() => navigate('/blog')}
+          className="text-white cursor-pointer hover:text-[#A3E635] font-medium transition-colors"
+        >
+          Blog
+        </button>
+
         {/* Features Dropdown */}
         <div className="relative" ref={featuresRef}>
           <button
@@ -120,7 +129,7 @@ const Navbar: React.FC = () => {
           <>
             <button
               onClick={() => navigate('/dashboard')}
-              className="text-white cursor-pointer hover:text-[#A3E635] font-medium transition-colors"
+              className="text-white cursor-pointer  hover:text-[#A3E635] font-medium transition-colors"
             >
               Dashboard
             </button>

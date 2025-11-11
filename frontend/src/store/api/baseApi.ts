@@ -80,6 +80,7 @@ export const baseApi = createApi({
     "Profile",
     "Dashboard",
     "App",
+    "Blog",
     "Comment",
     "Category",
     "Tag",
