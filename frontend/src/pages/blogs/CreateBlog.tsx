@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { 
-  useCreateBlogMutation, 
+import {
+  useCreateBlogMutation,
   useUpdateBlogMutation,
-  useGetBlogBySlugQuery 
+  useGetBlogBySlugQuery
 } from '../../store/api/blogApi';
 import { useGetProfileQuery } from '../../store/api/authApi';
 import Navbar from '../../components/Navbar';
+import RichTextEditor from '../../components/RichTextEditor';
 
 const CreateBlog = () => {
   const navigate = useNavigate();
@@ -15,7 +16,7 @@ const CreateBlog = () => {
 
   const { data: profileData } = useGetProfileQuery();
   const { data: blogData } = useGetBlogBySlugQuery(slug || '', { skip: !isEditMode });
-  
+
   const [createBlog, { isLoading: creating }] = useCreateBlogMutation();
   const [updateBlog, { isLoading: updating }] = useUpdateBlogMutation();
 
@@ -113,7 +114,7 @@ const CreateBlog = () => {
         await createBlog(blogPayload).unwrap();
         alert('Blog created successfully!');
       }
-      
+
       navigate('/blog');
     } catch (err: any) {
       setError(err?.data?.message || 'Failed to save blog');
@@ -129,7 +130,7 @@ const CreateBlog = () => {
   return (
     <div className="min-h-screen bg-[#0A191F] text-white">
       <Navbar />
-      
+
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
         <div className="mb-8">
           <h1 className="text-4xl md:text-5xl font-bold mb-2">
@@ -203,16 +204,13 @@ const CreateBlog = () => {
             <label className="block text-sm font-semibold mb-2">
               Content <span className="text-red-400">*</span>
             </label>
-            <textarea
-              value={formData.content}
-              onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-              placeholder="Write your blog content here... (HTML supported)"
-              rows={15}
-              className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-lg focus:outline-none focus:border-[#a2e535] text-white resize-none font-mono text-sm"
-              required
+            <RichTextEditor
+              content={formData.content}
+              onChange={(content) => setFormData({ ...formData, content })}
+              placeholder="Write your blog content here..."
             />
             <p className="mt-2 text-sm text-slate-400">
-              You can use HTML tags for formatting (e.g., &lt;h2&gt;, &lt;p&gt;, &lt;strong&gt;, &lt;em&gt;, &lt;ul&gt;, &lt;ol&gt;, &lt;code&gt;, etc.)
+              Use the toolbar above to format your content. Supports headings, lists, links, images, and more.
             </p>
           </div>
 
@@ -246,7 +244,7 @@ const CreateBlog = () => {
           {/* SEO Meta Tags */}
           <div className="border-t border-slate-700 pt-6">
             <h3 className="text-xl font-bold mb-4">SEO Settings</h3>
-            
+
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-semibold mb-2">Meta Title</label>

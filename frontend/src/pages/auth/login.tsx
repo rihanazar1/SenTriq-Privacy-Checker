@@ -20,7 +20,6 @@ const Login = () => {
     try {
       const result = await loginMutation(formData).unwrap();
       if (result.success) {
-        // Store token in localStorage
         localStorage.setItem('token', result.token);
         toastService.success('Login successful!');
         navigate('/');
@@ -37,11 +36,11 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex bg-[#0A191F]">
-      {/* Left Side - Privacy Animation */}
-      <div className="flex-1 flex items-center justify-center p-8 relative overflow-hidden bg-gradient-to-br from-[#0F2027] via-[#203A43] to-[#2C5364]">
+    <div className="min-h-screen flex flex-col md:flex-row bg-[#0A191F]">
+
+      {/* Left Side - Animation (Hidden on Mobile) */}
+      <div className="flex-1 hidden md:flex items-center justify-center p-8 relative overflow-hidden bg-gradient-to-br from-[#0F2027] via-[#203A43] to-[#2C5364]">
         <div className="text-center text-white z-10 relative">
-          {/* Privacy Animation */}
           <div className="mb-12 relative">
             <div className="relative inline-block">
               <div className="w-32 h-32 bg-white/10 rounded-full flex items-center justify-center backdrop-blur-lg border-2 border-white/20 animate-bounce">
@@ -51,9 +50,9 @@ const Login = () => {
                   </svg>
                 </div>
               </div>
-              {/* Pulse rings */}
-              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-32 h-32 border-2 border-white/30 rounded-full animate-ping"></div>
-              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-32 h-32 border-2 border-white/20 rounded-full animate-ping animation-delay-500"></div>
+
+              <div className="absolute inset-0 w-32 h-32 border-2 border-white/30 rounded-full animate-ping"></div>
+              <div className="absolute inset-0 w-32 h-32 border-2 border-white/20 rounded-full animate-ping animation-delay-500"></div>
             </div>
           </div>
           
@@ -62,7 +61,7 @@ const Login = () => {
             <p className="text-lg mb-8 opacity-90 leading-relaxed">
               Sign in to your secure account and continue your journey with complete privacy and protection.
             </p>
-            
+
             <div className="space-y-4">
               <div className="flex items-center gap-4 bg-white/10 p-4 rounded-xl backdrop-blur-sm border border-white/20">
                 <div className="text-2xl">⚡</div>
@@ -79,7 +78,6 @@ const Login = () => {
             </div>
           </div>
 
-          {/* Floating Elements */}
           <div className="absolute inset-0 pointer-events-none">
             <div className="absolute top-1/4 left-1/4 text-3xl opacity-30 animate-pulse">🔑</div>
             <div className="absolute top-3/4 right-1/4 text-3xl opacity-30 animate-pulse animation-delay-1000">🛡️</div>
@@ -90,16 +88,16 @@ const Login = () => {
       </div>
 
       {/* Right Side - Login Form */}
-      <div className="flex-1 flex items-center justify-center p-8 bg-[#0A191F]">
+      <div className="flex-1 flex items-center justify-center p-6 md:p-8 bg-[#0A191F]">
         <div className="w-full max-w-md">
+          
           <div className="text-center mb-8">
             <h2 className="text-3xl font-bold text-white mb-2">Sign In</h2>
             <p className="text-gray-400">Access your secure account</p>
           </div>
 
-
-
           <form onSubmit={handleSubmit} className="space-y-6">
+            
             <div>
               <label htmlFor="email" className="block text-sm font-semibold text-gray-300 mb-2">Email Address</label>
               <div className="relative">
@@ -113,7 +111,7 @@ const Login = () => {
                   required
                   className="w-full pl-12 pr-4 py-3 bg-gray-800/50 border border-gray-700 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-[#a2e535] focus:ring-2 focus:ring-[#a2e535]/20 transition-all duration-300"
                 />
-                <div className="absolute left-4 top-1/2 transform -translate-y-1/2">
+                <div className="absolute left-4 top-1/2 -translate-y-1/2">
                   <svg viewBox="0 0 24 24" className="w-5 h-5 fill-gray-400">
                     <path d="M20,8L12,13L4,8V6L12,11L20,6M20,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V6C22,4.89 21.1,4 20,4Z" />
                   </svg>
@@ -134,15 +132,17 @@ const Login = () => {
                   required
                   className="w-full pl-12 pr-12 py-3 bg-gray-800/50 border border-gray-700 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-[#a2e535] focus:ring-2 focus:ring-[#a2e535]/20 transition-all duration-300"
                 />
-                <div className="absolute left-4 top-1/2 transform -translate-y-1/2">
+
+                <div className="absolute left-4 top-1/2 -translate-y-1/2">
                   <svg viewBox="0 0 24 24" className="w-5 h-5 fill-gray-400">
                     <path d="M12,17A2,2 0 0,0 14,15C14,13.89 13.1,13 12,13A2,2 0 0,0 10,15A2,2 0 0,0 12,17M18,8A2,2 0 0,1 20,10V20A2,2 0 0,1 18,22H6A2,2 0 0,1 4,20V10C4,8.89 4.9,8 6,8H7V6A5,5 0 0,1 12,1A5,5 0 0,1 17,6V8H18M12,3A3,3 0 0,0 9,6V8H15V6A3,3 0 0,0 12,3Z" />
                   </svg>
                 </div>
+
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-[#a2e535] transition-colors"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#a2e535] transition-colors"
                 >
                   <svg viewBox="0 0 24 24" className="w-5 h-5 fill-current">
                     {showPassword ? (
@@ -163,6 +163,7 @@ const Login = () => {
                 </div>
                 <span className="text-sm text-gray-400">Remember me</span>
               </label>
+
               <Link to="/forgot-password" className="text-sm text-[#a2e535] hover:text-[#7dd321] transition-colors">
                 Forgot password?
               </Link>
@@ -175,19 +176,22 @@ const Login = () => {
             >
               {isLoginLoading ? (
                 <div className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin"></div>
-              ) : (
-                'Sign In'
-              )}
+              ) : 'Sign In'}
             </button>
           </form>
 
           <div className="text-center mt-8 pt-6 border-t border-gray-700">
             <p className="text-gray-400">
-              Don't have an account? <Link to="/register" className="text-[#a2e535] hover:text-[#7dd321] font-semibold transition-colors">Create one</Link>
+              Don't have an account? 
+              <Link to="/register" className="text-[#a2e535] hover:text-[#7dd321] font-semibold transition-colors ml-1">
+                Create one
+              </Link>
             </p>
           </div>
+
         </div>
       </div>
+
     </div>
   );
 };

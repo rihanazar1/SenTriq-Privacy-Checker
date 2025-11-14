@@ -115,14 +115,21 @@ const Home: React.FC = () => {
               generate fake data to protect your identity effortlessly find securely
             </p>
 
-            <div className="flex items-center justify-center space-x-4">
-              <button className="bg-[#a2e535] text-black px-8 py-3 rounded-full font-semibold text-lg hover:bg-[#a6cf63] transition-colors">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:space-x-4">
+              <button
+                onClick={() => navigate("/register")}
+                className="bg-[#a2e535] text-black px-8 py-2 sm:px-8 sm:py-3 rounded-full font-semibold text-base sm:text-lg hover:bg-[#bcee6c] transition-colors"
+              >
                 Get Started Free
               </button>
-              <button className="bg-slate-700 text-white px-8 py-3 rounded-full font-semibold text-lg hover:bg-slate-600 transition-colors">
-                How Its Work
+
+              <button
+                className="bg-slate-700 text-white px-8 py-2 sm:px-8 sm:py-3 rounded-full font-semibold text-base sm:text-lg hover:bg-slate-600 transition-colors"
+              >
+                How It Works
               </button>
             </div>
+
           </div>
         </div>
       </div>

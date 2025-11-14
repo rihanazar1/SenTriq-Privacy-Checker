@@ -2,11 +2,9 @@ import React, { useState, useRef, useEffect } from 'react';
 import images from '../assets/';
 import { useNavigate } from 'react-router-dom';
 import { useGetProfileQuery } from '../store/api/authApi';
-import { ChevronDown, User, LogOut } from 'lucide-react';
+import { ChevronDown, User, LogOut, Home, Grid, Users } from 'lucide-react';
 
 const Navbar: React.FC = () => {
-
-
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isFeaturesOpen, setIsFeaturesOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -18,11 +16,9 @@ const Navbar: React.FC = () => {
   // Check authentication status
   const token = localStorage.getItem('token');
 
-  const { data: profileData} = useGetProfileQuery(undefined, {
+  const { data: profileData } = useGetProfileQuery(undefined, {
     skip: !token
   });
-
-  console.log(profileData)
 
   // Simple token-based authentication check
   const isAuthenticated = !!token;
@@ -68,10 +64,16 @@ const Navbar: React.FC = () => {
     localStorage.removeItem('token');
     navigate('/');
     setIsProfileOpen(false);
+    setIsMenuOpen(false);
   };
 
   const getInitials = (name: string) => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase();
+  };
+
+  const handleMobileNavigation = (path: string) => {
+    navigate(path);
+    setIsMenuOpen(false);
   };
 
   return (
@@ -83,7 +85,7 @@ const Navbar: React.FC = () => {
         <span className="text-2xl font-extrabold text-white tracking-wide">SenTriq</span>
       </div>
 
-      {/* Desktop Menu */}
+      {/* Desktop Menu (NO CHANGES) */}
       <div className="hidden md:flex items-center space-x-6">
         <button
           onClick={() => navigate('/')}
@@ -129,7 +131,7 @@ const Navbar: React.FC = () => {
           <>
             <button
               onClick={() => navigate('/dashboard')}
-              className="text-white cursor-pointer  hover:text-[#A3E635] font-medium transition-colors"
+              className="text-white border-[1px] border-[#A3E635] hover:bg-[#A3E635] rounded-md px-3 py-2 cursor-pointer hover:text-black font-medium transition-colors"
             >
               Dashboard
             </button>
@@ -197,7 +199,7 @@ const Navbar: React.FC = () => {
         )}
       </div>
 
-      {/* Mobile Hamburger */}
+      {/* Mobile Hamburger (NO CHANGES) */}
       <div className="md:hidden flex items-center">
         <button
           onClick={toggleMenu}
@@ -209,33 +211,41 @@ const Navbar: React.FC = () => {
         </button>
       </div>
 
-      {/* Mobile Menu */}
+      {/* Mobile Menu (UPDATED - Solid BG) */}
       <div
-        className={`fixed top-0 right-0 h-full w-80 bg-gray-900/95 backdrop-blur-md rounded-l-3xl transform transition-transform duration-500 z-40 ${isMenuOpen ? 'translate-x-0' : 'translate-x-full'
+        className={`fixed top-0 right-0 h-full w-64 bg-transparent transform transition-transform duration-300 z-40 ${isMenuOpen ? 'translate-x-0' : 'translate-x-full'
           }`}
       >
-        <div className="flex flex-col p-8 space-y-4 mt-16">
+        <div className="flex flex-col p-4 space-y-4 mt-20 bg-[#001a05] rounded-l-xl">
+
+          {/* Primary Navigation Buttons */}
           <button
-            onClick={() => {
-              navigate('/');
-              setIsMenuOpen(false);
-            }}
-            className="w-full text-left text-white text-lg font-semibold px-4 py-3 rounded-xl backdrop-blur-md bg-green-500/20 hover:bg-green-500/40 hover:shadow-lg transition-all duration-300"
+            onClick={() => handleMobileNavigation('/')}
+            className="w-full text-left text-white text-lg font-semibold px-4 py-3 rounded-lg bg-green-500/10 hover:bg-green-500/20 transition-all duration-200 flex items-center space-x-3"
           >
-            Home
+            <Home className="w-5 h-5 text-[#A3E635] " />
+            <span>Home</span>
           </button>
 
-          {/* Mobile Features */}
-          <div className="space-y-2">
-            <div className="text-white text-lg font-semibold px-4 py-2">Features</div>
+          <button
+            onClick={() => handleMobileNavigation('/blog')}
+            className="w-full text-left text-white text-lg font-semibold px-4 py-3 rounded-lg bg-green-500/10 hover:bg-green-500/20 transition-all duration-200 flex items-center space-x-3"
+          >
+            <Grid className="w-5 h-5 text-[#A3E635]" />
+            <span>Blog</span>
+          </button>
+
+          {/* Mobile Features Section */}
+          <div className="space-y-2 border-t border-b border-gray-700 py-3 mt-4">
+            <div className="text-[#A3E635] text-sm font-bold px-4 pt-2 tracking-wider uppercase">Features</div>
             {features.map((feature) => (
               <button
                 key={feature.name}
                 onClick={() => handleFeatureClick(feature.path)}
-                className="w-full text-left text-gray-300 px-6 py-2 rounded-lg hover:bg-green-500/20 transition-all duration-300"
+                className="w-full text-left text-gray-300 px-4 py-2 rounded-lg hover:bg-gray-800 transition-all duration-200"
               >
-                <div className="font-medium">{feature.name}</div>
-                <div className="text-sm text-gray-400">{feature.description}</div>
+                <div className="font-medium text-white">{feature.name}</div>
+                <div className="text-xs text-gray-400">{feature.description}</div>
               </button>
             ))}
           </div>
@@ -243,52 +253,46 @@ const Navbar: React.FC = () => {
           {isAuthenticated ? (
             <>
               <button
-                onClick={() => {
-                  navigate('/dashboard');
-                  setIsMenuOpen(false);
-                }}
-                className="w-full text-left text-white text-lg font-semibold px-4 py-3 rounded-xl backdrop-blur-md bg-green-500/20 hover:bg-green-500/40 hover:shadow-lg transition-all duration-300"
+                onClick={() => handleMobileNavigation('/dashboard')}
+                className="w-full text-left text-white text-lg font-semibold px-4 py-3 rounded-lg bg-green-500/10 hover:bg-green-500/20 transition-all duration-200 flex items-center space-x-3"
               >
-                Dashboard
+                <Grid className="w-5 h-5 text-[#A3E635]" />
+                <span>Dashboard</span>
               </button>
 
               {user?.role === 'admin' && (
                 <button
-                  onClick={() => {
-                    navigate('/admin');
-                    setIsMenuOpen(false);
-                  }}
-                  className="w-full text-left text-white text-lg font-semibold px-4 py-3 rounded-xl backdrop-blur-md bg-red-500/20 hover:bg-red-500/40 hover:shadow-lg transition-all duration-300"
+                  onClick={() => handleMobileNavigation('/admin')}
+                  className="w-full text-left text-white text-lg font-semibold px-4 py-3 rounded-lg bg-red-500/10 hover:bg-red-500/20 transition-all duration-200 flex items-center space-x-3"
                 >
-                  Admin Panel
+                  <Users className="w-5 h-5 text-red-400" />
+                  <span>Admin Panel</span>
                 </button>
               )}
 
-              <div className="border-t border-gray-600 pt-4">
+              {/* Mobile Profile Section */}
+              <div className="border-t-2 border-gray-700 pt-4 mt-4">
                 <div className="flex items-center space-x-3 px-4 py-2 mb-2">
-                  <div className="flex items-center justify-center w-10 h-10 bg-gradient-to-r from-[#A3E635] to-[#146536] text-black font-bold rounded-full">
+                  <div className="flex items-center justify-center w-10 h-10 bg-gradient-to-r from-[#A3E635] to-[#146536] text-black font-bold rounded-full text-sm">
                     {user?.name ? getInitials(user.name) : 'U'}
                   </div>
-                  <div>
-                    <div className="text-white font-medium">{user?.name}</div>
-                    <div className="text-gray-400 text-sm">{user?.email}</div>
+                  <div className="truncate">
+                    <div className="text-white font-medium truncate">{user?.name}</div>
+                    <div className="text-gray-400 text-sm truncate">{user?.email}</div>
                   </div>
                 </div>
 
                 <button
-                  onClick={() => {
-                    navigate('/profile');
-                    setIsMenuOpen(false);
-                  }}
-                  className="w-full text-left text-white px-4 py-2 rounded-lg hover:bg-green-500/20 transition-all duration-300 flex items-center space-x-2"
+                  onClick={() => handleMobileNavigation('/profile')}
+                  className="w-full text-left text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition-all duration-200 flex items-center space-x-3"
                 >
-                  <User className="w-4 h-4" />
+                  <User className="w-4 h-4 text-gray-400" />
                   <span>Profile</span>
                 </button>
 
                 <button
                   onClick={handleLogout}
-                  className="w-full text-left text-red-400 px-4 py-2 rounded-lg hover:bg-red-500/20 transition-all duration-300 flex items-center space-x-2"
+                  className="w-full text-left text-red-400 px-4 py-2 rounded-lg hover:bg-red-500/20 transition-all duration-200 flex items-center space-x-3 mt-1"
                 >
                   <LogOut className="w-4 h-4" />
                   <span>Logout</span>
@@ -297,21 +301,16 @@ const Navbar: React.FC = () => {
             </>
           ) : (
             <>
+              {/* Auth Buttons for Mobile */}
               <button
-                onClick={() => {
-                  navigate('/register');
-                  setIsMenuOpen(false);
-                }}
-                className="w-full text-left text-black text-lg font-semibold px-4 py-3 rounded-xl backdrop-blur-md bg-[#A3E635]/80 hover:bg-[#A3E635] hover:shadow-lg transition-all duration-300"
+                onClick={() => handleMobileNavigation('/register')}
+                className="w-full text-center text-black font-bold px-4 py-3 rounded-lg bg-[#A3E635] hover:bg-[#8BC34A] transition-all duration-200 mt-4"
               >
                 Get Started
               </button>
               <button
-                onClick={() => {
-                  navigate('/login');
-                  setIsMenuOpen(false);
-                }}
-                className="w-full text-left text-white text-lg font-semibold px-4 py-3 rounded-xl backdrop-blur-md bg-slate-800/80 hover:bg-slate-700 hover:shadow-lg transition-all duration-300"
+                onClick={() => handleMobileNavigation('/login')}
+                className="w-full text-center text-white font-bold px-4 py-3 rounded-lg bg-slate-700 hover:bg-slate-600 transition-all duration-200"
               >
                 Login
               </button>
@@ -320,7 +319,7 @@ const Navbar: React.FC = () => {
         </div>
       </div>
 
-      {/* Overlay */}
+      {/* Overlay (NO CHANGES) */}
       {isMenuOpen && (
         <div
           className="fixed inset-0 bg-black/30 backdrop-blur-sm z-30 transition-opacity"
