@@ -211,12 +211,12 @@ const Navbar: React.FC = () => {
         </button>
       </div>
 
-      {/* Mobile Menu (UPDATED - Solid BG) */}
+      {/* Mobile Menu (UPDATED - Scrollable) */}
       <div
         className={`fixed top-0 right-0 h-full w-64 bg-transparent transform transition-transform duration-300 z-40 ${isMenuOpen ? 'translate-x-0' : 'translate-x-full'
           }`}
       >
-        <div className="flex flex-col p-4 space-y-4 mt-20 bg-[#001a05] rounded-l-xl">
+        <div className="flex flex-col p-4 space-y-4 mt-20 bg-[#001a05] rounded-l-xl h-[600px] overflow-y-auto pb-24">
 
           {/* Primary Navigation Buttons */}
           <button
