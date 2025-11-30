@@ -57,23 +57,23 @@ const BlogList = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
         {/* Header */}
         <div className="text-center mb-12">
-  <h1 className="text-5xl md:text-6xl font-bold mb-4">Our Blog</h1>
+          <h1 className="text-5xl md:text-6xl font-bold mb-4">Our Blog</h1>
 
-  <p className="text-xl text-slate-300 max-w-2xl mx-auto">
-    Insights on privacy, security, and taking control of your digital life
-  </p>
+          <p className="text-xl text-slate-300 max-w-2xl mx-auto">
+            Insights on privacy, security, and taking control of your digital life
+          </p>
 
-  <div className="flex justify-center mt-6">
-    <button
-      onClick={() => navigate("/blog/create")}
-      className="flex items-center gap-2 w-full justify-center py-3 border border-[#a2e535] rounded-lg font-medium 
+          <div className="flex justify-center mt-6">
+            <button
+              onClick={() => navigate("/blog/create")}
+              className="flex items-center gap-2 w-full justify-center py-3 border border-[#a2e535] rounded-lg font-medium 
                  hover:bg-[#a2e535] hover:text-black transition-all duration-300"
-    >
-      Create Blog
-      <Plus className="w-5 h-5" />
-    </button>
-  </div>
-</div>
+            >
+              Create Blog
+              <Plus className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
 
 
         {/* Search and Filter */}

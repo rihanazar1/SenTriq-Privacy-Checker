@@ -22,6 +22,7 @@ const CreateBlog = () => {
 
   const [formData, setFormData] = useState({
     title: '',
+    slug: '',
     content: '',
     excerpt: '',
     category: '',
@@ -48,6 +49,7 @@ const CreateBlog = () => {
       const blog = blogData.data;
       setFormData({
         title: blog.title,
+        slug: blog.slug || '',
         content: blog.content,
         excerpt: blog.excerpt || '',
         category: blog.category || '',
@@ -80,8 +82,15 @@ const CreateBlog = () => {
     e.preventDefault();
     setError('');
 
-    if (!formData.title.trim() || !formData.content.trim()) {
-      setError('Title and content are required');
+    if (!formData.title.trim() || !formData.content.trim() || !formData.slug.trim()) {
+      setError('Title, slug and content are required');
+      return;
+    }
+
+    // Validate slug format
+    const slugRegex = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+    if (!slugRegex.test(formData.slug)) {
+      setError('Slug must contain only lowercase letters, numbers, and hyphens');
       return;
     }
 
@@ -93,6 +102,7 @@ const CreateBlog = () => {
 
       const blogPayload = {
         title: formData.title,
+        slug: formData.slug,
         content: formData.content,
         excerpt: formData.excerpt || undefined,
         category: formData.category || undefined,
@@ -161,6 +171,44 @@ const CreateBlog = () => {
               className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-lg focus:outline-none focus:border-[#a2e535] text-white"
               required
             />
+          </div>
+
+          {/* URL Slug */}
+          <div>
+            <label className="block text-sm font-semibold mb-2">
+              URL Slug <span className="text-red-400">*</span>
+            </label>
+            <div className="flex">
+              <span className="px-3 py-3 bg-slate-700 border border-slate-700 rounded-l-lg text-slate-400 text-sm">
+                /blog/
+              </span>
+              <input
+                type="text"
+                value={formData.slug}
+                onChange={(e) => setFormData({ ...formData, slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '') })}
+                placeholder="my-awesome-blog-post"
+                className="flex-1 px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-r-lg focus:outline-none focus:border-[#a2e535] text-white"
+                required
+              />
+            </div>
+            <button 
+              type="button"
+              onClick={() => {
+                const slug = formData.title
+                  .toLowerCase()
+                  .replace(/[^a-z0-9\s-]/g, '')
+                  .replace(/\s+/g, '-')
+                  .replace(/-+/g, '-')
+                  .trim();
+                setFormData({...formData, slug});
+              }}
+              className="mt-2 text-sm text-[#a2e535] hover:underline"
+            >
+              Generate from title
+            </button>
+            <p className="mt-1 text-xs text-slate-400">
+              Only lowercase letters, numbers, and hyphens allowed
+            </p>
           </div>
 
           {/* Cover Image */}

@@ -293,8 +293,8 @@ const BlogDetail = () => {
           </div>
         )}
 
-        {/* Like Button */}
-        <div className="flex items-center gap-4 mb-12 pb-12 border-b border-slate-700">
+        {/* Like Button & Admin Actions */}
+        <div className="flex items-center justify-between mb-12 pb-12 border-b border-slate-700">
           <button
             onClick={handleLike}
             disabled={liking}
@@ -303,6 +303,19 @@ const BlogDetail = () => {
             <span className="text-2xl">❤️</span>
             <span>{blog.likesCount} Likes</span>
           </button>
+
+          {/* Admin Edit Button */}
+          {currentUser?.role === 'admin' && (
+            <button
+              onClick={() => navigate(`/admin/blog/edit/${blog.slug}`)}
+              className="flex items-center gap-2 px-6 py-3 bg-[#a2e535] text-black rounded-lg hover:bg-[#a6cf63] transition-colors font-semibold"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+              </svg>
+              Edit Blog
+            </button>
+          )}
         </div>
 
         {/* Comments Section */}

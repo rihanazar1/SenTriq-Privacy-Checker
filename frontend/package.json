@@ -5,9 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b && vite build && npm run generate:sitemap",
     "postbuild": "react-snap",
-    "build:vercel": "vite build --mode production",
+    "build:vercel": "vite build --mode production && npm run generate:sitemap",
+    "generate:sitemap": "node scripts/generateSitemap.js",
     "lint": "eslint .",
     "preview": "vite preview"
   },
@@ -26,7 +27,10 @@
       "/",
       "/blog"
     ],
-    "skipThirdPartyRequests": true
+    "skipThirdPartyRequests": true,
+    "crawl": true,
+    "waitFor": 2000,
+    "externalServer": false
   },
   "dependencies": {
     "@reduxjs/toolkit": "^2.9.2",
